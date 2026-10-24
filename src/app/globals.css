@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --text-primary: #0b192c;
+    --text-secondary: #475569;
+    --border-subtle: #e2e8f0;
+  }
+
+  .dark {
+    --bg-primary: #050d1a;
+    --bg-secondary: #0b192c;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-subtle: #1e293b;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-slate-900 dark:bg-navy-950 dark:text-slate-100 antialiased selection:bg-electric-600 selection:text-white transition-colors duration-200;
+  }
+
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-electric-500;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

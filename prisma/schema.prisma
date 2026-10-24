@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Platform {
+  id                 String   @id @default(cuid())
+  name               String
+  slug               String   @unique
+  category           String
+  short_description  String
+  full_description   String
+  logo               String?
+  features           String   // JSON array of strings or feature objects
+  target_audience    String
+  business_purpose   String   @default("")
+  website_url        String?
+  platform_status    String   @default("In Development") // Live | Coming Soon | In Development | Temporarily Unavailable
+  publication_status String   @default("Published")      // Published | Draft | Archived
+  display_order      Int      @default(0)
+  seo_title          String?
+  seo_description    String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@map("platforms")
+}
+
+model ContactInquiry {
+  id                     String   @id @default(cuid())
+  full_name              String
+  email                  String
+  company                String?
+  inquiry_type           String
+  subject                String
+  message                String
+  status                 String   @default("New") // New | In Progress | Resolved
+  admin_notes            String?
+  privacy_consent_record String
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+
+  @@map("contact_inquiries")
+}
+
+model Admin {
+  id            String             @id @default(cuid())
+  email         String             @unique
+  password_hash String
+  role          String             @default("Super Admin")
+  is_active     Boolean            @default(true)
+  last_login_at DateTime?
+  created_at    DateTime           @default(now())
+  activity_logs AdminActivityLog[]
+
+  @@map("admins")
+}
+
+model SiteSetting {
+  id            String   @id @default(cuid())
+  setting_key   String   @unique
+  setting_value String
+  updated_at    DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model ContentPage {
+  id                 String   @id @default(cuid())
+  page_slug          String   @unique
+  content            String   // JSON string containing structured page fields
+  publication_status String   @default("Published")
+  seo_metadata       String   // JSON string containing { title, description, og_image }
+  updated_at         DateTime @updatedAt
+
+  @@map("content_pages")
+}
+
+model AdminActivityLog {
+  id         String   @id @default(cuid())
+  admin_id   String
+  action     String
+  target     String
+  created_at DateTime @default(now())
+
+  admin Admin @relation(fields: [admin_id], references: [id], onDelete: Cascade)
+
+  @@map("admin_activity_logs")
+}
+
