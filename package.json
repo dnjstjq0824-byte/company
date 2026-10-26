@@ -1,10 +1,13 @@
 {
   "name": "company",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && opennextjs-cloudflare build --skipNextBuild",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && next build && opennextjs-cloudflare build --skipNextBuild",
+    "cf:build": "prisma generate && next build && opennextjs-cloudflare build --skipNextBuild",
+    "deploy": "wrangler deploy",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",

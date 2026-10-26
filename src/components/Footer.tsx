@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Globe, Mail, MapPin, Phone, ShieldCheck, ArrowUpRight } from "lucide-react";
 import { ParsedPlatform } from "@/lib/data";
 import { useLanguage } from "@/lib/i18n";
+import { APP_VERSION, COMMIT_SHA } from "@/lib/version";
 
 export function Footer({
   settings,
@@ -266,10 +267,13 @@ export function Footer({
         {/* Bottom Copyright */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-8 sm:flex-row text-xs text-slate-500">
           <p>{t.common.footerCopyright}</p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <span className="inline-flex items-center gap-1.5 text-slate-400">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>Backbone Status: 99.999% SLA Operational</span>
+            </span>
+            <span className="font-mono text-[11px] text-slate-500 border-l border-slate-800 pl-4">
+              v{APP_VERSION} ({COMMIT_SHA})
             </span>
           </div>
         </div>

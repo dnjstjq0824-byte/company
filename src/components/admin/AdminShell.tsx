@@ -14,6 +14,7 @@ import {
   LogOut,
   ExternalLink,
 } from "lucide-react";
+import { APP_VERSION, COMMIT_SHA } from "@/lib/version";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Executive Command", icon: LayoutDashboard },
@@ -126,6 +127,10 @@ export function AdminShell({
                 {admin.role}
               </span>
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+            <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-500">
+              <span>v{APP_VERSION}</span>
+              <span className="text-slate-400">commit:{COMMIT_SHA}</span>
             </div>
           </div>
 
