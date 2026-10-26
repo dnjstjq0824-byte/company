@@ -8,11 +8,19 @@ import {
   Cpu,
   CheckCircle2,
   Globe,
+  Building2,
+  ShieldCheck,
+  Scale,
+  MapPin,
+  Mail,
+  ArrowUpRight,
+  Sparkles,
 } from "lucide-react";
 import {
   getContentPageBySlug,
   getAllSiteSettings,
   getPublishedPlatforms,
+  getActiveGlobalHubs,
 } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
@@ -28,246 +36,166 @@ interface AboutContent {
   strategy_body?: string;
   innovation_heading?: string;
   innovation_items?: string[];
+  governance_heading?: string;
+  governance_body?: string;
   verified_corporate_facts_note?: string;
 }
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getContentPageBySlug<AboutContent>("about");
   return {
-    title: page?.seo_metadata?.title || "About Us | Booking Network Co., Ltd.",
+    title:
+      page?.seo_metadata?.title ||
+      "About Us — Corporate Governance & Vision | Booking Network Global Group",
     description:
       page?.seo_metadata?.description ||
-      "Learn about Booking Network Co., Ltd., our corporate vision, mission, business philosophy, and global platform strategy.",
+      "Learn about Booking Network Global Group's institutional governance, strategic vision, R&D roadmap, and global regional hubs.",
     alternates: { canonical: "/about" },
   };
 }
 
 export default async function AboutPage() {
-  const [pageData, settings, platforms] = await Promise.all([
+  const [pageData, settings, platforms, globalHubs] = await Promise.all([
     getContentPageBySlug<AboutContent>("about"),
     getAllSiteSettings(),
     getPublishedPlatforms(),
+    getActiveGlobalHubs(),
   ]);
 
   const content = pageData?.content || {};
-  const companyName = settings.company_name || "Booking Network Co., Ltd.";
+  const companyName = settings.company_name || "Booking Network Global Group";
   const tagline =
-    settings.tagline || "Connecting Platforms. Expanding Possibilities.";
+    settings.tagline ||
+    "Architecting the Global Digital Backbone. Connecting Next-Generation Platforms.";
 
   const overviewParagraphs = (
     content.overview_body ||
-    `${companyName} is a global digital technology company dedicated to building, launching, and scaling an ecosystem of specialized online platforms.`
+    `${companyName} is an international IT platform group and digital infrastructure holding company headquartered in Seoul, with operational and research hubs in San Jose, Frankfurt, and Dubai.\n\nOur foundational mandate is to design, govern, and scale the mission-critical digital backbones that empower modern digital commerce, enterprise data intelligence, cross-border financial telemetry, and resilient cloud communications.`
   )
-    .split("\n")
+    .split("\n\n")
     .map((p) => p.trim())
     .filter(Boolean);
 
   const strategyParagraphs = (
     content.strategy_body ||
-    `Our multi-sector platform strategy focuses on six interconnected pillars of digital life.`
+    `Over the 2026–2030 strategic horizon, Booking Network Global Group is prioritizing three transformative technological vectors: Autonomous Edge Mesh Computing, Quantum-Resistant Cryptographic Foundations, and Universal B2B Interoperability.`
   )
-    .split("\n")
+    .split("\n\n")
     .map((p) => p.trim())
     .filter(Boolean);
 
   const philosophyItems = content.philosophy_items || [
     {
-      title: "Independent Identity, Shared Excellence",
+      title: "Architectural Sovereignty & Resilience",
       description:
-        "Every platform in the Booking Network portfolio is purpose-built for its specific vertical.",
+        "We design every system for multi-region redundancy, zero-single-point-of-failure topologies, and autonomous failover capabilities exceeding 99.999% availability.",
     },
     {
-      title: "Clarity & Utility First",
+      title: "Zero-Trust Security by Default",
       description:
-        "Our platforms prioritize clean interfaces, structured information, and transparent user journeys.",
+        "Security is not a perimeter; it is an intrinsic mathematical property. We enforce continuous cryptographic verification across every internal microservice and external API bridge.",
     },
     {
-      title: "Scalable Global Architecture",
+      title: "Sustainable & Ethical Stewardship",
       description:
-        "We design our platforms from day one for international audiences and modular expansion.",
+        "As we scale computational volume, we aggressively minimize carbon intensity through intelligent renewable workload routing, algorithmic fairness, and strict accessibility mandates.",
     },
   ];
 
   const innovationItems = content.innovation_items || [
-    "High-precision metasearch indexing and multi-source data normalization",
-    "Scalable open marketplace and digital catalog architectures",
-    "Structured knowledge graphs and collaborative editorial tooling",
-    "Low-latency media delivery and real-time digital communication systems",
-    "Privacy-conscious, accessible, and standards-compliant web engineering",
+    "Carrier-grade edge networking with microsecond packet routing and autonomous BGP healing",
+    "High-scale streaming vector databases and real-time semantic ranking algorithms",
+    "Zero-knowledge compliance proofs for cross-border financial settlements",
+    "Modular enterprise platform frameworks with instant multi-tenant isolation",
+    "Carbon-aware computational dispatch and green datacenter energy telemetry",
   ];
 
   return (
-    <div>
-      {/* Page Header */}
-      <section className="bg-navy-950 py-16 text-white sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="bg-white dark:bg-obsidian-950 transition-colors">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-slate-200/80 bg-slate-50/50 py-20 dark:border-white/10 dark:bg-obsidian-900/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-electric-500/30 bg-electric-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-widest text-electric-400">
-              <Globe className="h-3.5 w-3.5" />
-              About {companyName}
-            </span>
-            <h1 className="mt-5 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-              {tagline}
+            <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/20 bg-cobalt-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-cobalt-600 dark:text-cyan-400">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Corporate Overview & Governance</span>
+            </div>
+
+            <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              {content.overview_heading || "Corporate Governance & Strategic Architecture"}
             </h1>
-            <p className="mt-5 text-lg leading-relaxed text-slate-300">
-              {settings.brand_positioning ||
-                "A global digital technology company developing and connecting platforms that empower commerce, travel, information discovery, financial market exploration, content sharing, and communication."}
+
+            <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+              {tagline}
             </p>
           </div>
         </div>
       </section>
 
-      {/* Company Overview */}
-      <section className="py-16 sm:py-20">
+      {/* Corporate Overview Body */}
+      <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
-            <div className="lg:col-span-7">
-              <span className="text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-                Who We Are
-              </span>
-              <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                {content.overview_heading || "Company Overview"}
-              </h2>
-              <div className="mt-5 space-y-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                {overviewParagraphs.map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <div className="lg:col-span-7 space-y-6 text-base sm:text-lg leading-relaxed text-slate-700 dark:text-slate-300">
+              {overviewParagraphs.map((para, idx) => (
+                <p key={idx}>{para}</p>
+              ))}
             </div>
 
-            <div className="lg:col-span-5">
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-7 dark:border-slate-800 dark:bg-navy-900">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                  Corporate Profile Summary
+            {/* Vision & Mission Cards */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="rounded-3xl border border-slate-200/90 bg-slate-50/80 p-7 dark:border-white/10 dark:bg-obsidian-900/80 shadow-sm">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cobalt-50 text-cobalt-600 dark:bg-white/10 dark:text-cyan-400 mb-4">
+                  <Compass className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  Corporate Vision
                 </h3>
-                <dl className="mt-5 space-y-4 text-sm">
-                  <div className="border-b border-slate-200/80 pb-3 dark:border-slate-800">
-                    <dt className="text-xs font-semibold uppercase text-slate-400">
-                      Official Entity Name
-                    </dt>
-                    <dd className="mt-1 font-bold text-slate-900 dark:text-white">
-                      {companyName}
-                    </dd>
-                  </div>
-                  <div className="border-b border-slate-200/80 pb-3 dark:border-slate-800">
-                    <dt className="text-xs font-semibold uppercase text-slate-400">
-                      Primary Business Model
-                    </dt>
-                    <dd className="mt-1 font-medium text-slate-700 dark:text-slate-200">
-                      Global Digital Platform Ecosystem & Corporate Holding
-                      Portal
-                    </dd>
-                  </div>
-                  <div className="border-b border-slate-200/80 pb-3 dark:border-slate-800">
-                    <dt className="text-xs font-semibold uppercase text-slate-400">
-                      Active Portfolio Scope
-                    </dt>
-                    <dd className="mt-1 font-medium text-slate-700 dark:text-slate-200">
-                      {platforms.length} Digital Platforms across 6 Core Sectors
-                    </dd>
-                  </div>
-                  {settings.business_address?.trim() && (
-                    <div className="border-b border-slate-200/80 pb-3 dark:border-slate-800">
-                      <dt className="text-xs font-semibold uppercase text-slate-400">
-                        Registered Address
-                      </dt>
-                      <dd className="mt-1 font-medium text-slate-700 dark:text-slate-200">
-                        {settings.business_address}
-                      </dd>
-                    </div>
-                  )}
-                  {settings.corporate_email?.trim() && (
-                    <div>
-                      <dt className="text-xs font-semibold uppercase text-slate-400">
-                        Official Corporate Contact
-                      </dt>
-                      <dd className="mt-1 font-medium text-electric-600 dark:text-electric-400">
-                        {settings.corporate_email}
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-                {content.verified_corporate_facts_note && (
-                  <p className="mt-5 rounded-xl bg-white p-3 text-xs text-slate-500 dark:bg-navy-950 dark:text-slate-400">
-                    {content.verified_corporate_facts_note}
-                  </p>
-                )}
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {content.vision ||
+                    "To engineer an unbreakable, intelligent, and sovereign global digital foundation where information, enterprise trade, and human connectivity flow frictionlessly across borders."}
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200/90 bg-slate-50/80 p-7 dark:border-white/10 dark:bg-obsidian-900/80 shadow-sm">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 dark:bg-white/10 dark:text-cyan-400 mb-4">
+                  <Target className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  Corporate Mission
+                </h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {content.mission ||
+                    "To deliver high-availability cloud infrastructure, transparent data intelligence, and zero-trust security standards that empower global enterprises and next-generation platform ecosystems."}
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Vision & Mission */}
-      <section className="border-y border-slate-200/80 bg-slate-50/80 py-16 dark:border-slate-800 dark:bg-navy-900/40 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            {/* Vision Card */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-navy-900">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-electric-600/10 text-electric-600 dark:bg-electric-500/20 dark:text-electric-400">
-                <Compass className="h-6 w-6" />
-              </div>
-              <span className="mt-6 block text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-                Corporate Vision
-              </span>
-              <h2 className="mt-1 font-display text-2xl font-extrabold text-slate-900 dark:text-white">
-                Our Vision
-              </h2>
-              <blockquote className="mt-4 text-lg font-medium leading-relaxed text-slate-700 dark:text-slate-200">
-                &ldquo;
-                {content.vision ||
-                  "To create a connected digital world where information, commerce, travel, and communication are more accessible across borders."}
-                &rdquo;
-              </blockquote>
-            </div>
-
-            {/* Mission Card */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-navy-900">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-electric-600/10 text-electric-600 dark:bg-electric-500/20 dark:text-electric-400">
-                <Target className="h-6 w-6" />
-              </div>
-              <span className="mt-6 block text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-                Corporate Mission
-              </span>
-              <h2 className="mt-1 font-display text-2xl font-extrabold text-slate-900 dark:text-white">
-                Our Mission
-              </h2>
-              <blockquote className="mt-4 text-lg font-medium leading-relaxed text-slate-700 dark:text-slate-200">
-                &ldquo;
-                {content.mission ||
-                  "To develop innovative digital platforms that help individuals and businesses discover information, access services, and connect with opportunities worldwide."}
-                &rdquo;
-              </blockquote>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Business Philosophy */}
-      <section className="py-16 sm:py-20">
+      {/* Institutional Core Principles */}
+      <section className="py-20 bg-slate-50/60 dark:bg-obsidian-900/40 border-y border-slate-200/80 dark:border-white/5">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-              Guiding Principles
-            </span>
-            <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              {content.philosophy_heading || "Our Business Philosophy"}
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+              {content.philosophy_heading || "Institutional Core Principles"}
             </h2>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
             {philosophyItems.map((item, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm dark:border-slate-800 dark:bg-navy-900"
+                className="rounded-3xl border border-slate-200/90 bg-white p-8 dark:border-white/10 dark:bg-obsidian-900 shadow-sm"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-950 text-xs font-bold text-electric-400">
-                  0{idx + 1}
+                <div className="text-xs font-mono font-bold text-cobalt-600 dark:text-cyan-400 uppercase tracking-wider mb-3">
+                  Principle 0{idx + 1}
                 </div>
-                <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-white">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                   {item.title}
                 </h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                   {item.description}
                 </p>
               </div>
@@ -276,50 +204,90 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* Global Platform Strategy & Areas of Innovation */}
-      <section className="border-t border-slate-200/80 bg-slate-50/70 py-16 dark:border-slate-800 dark:bg-navy-900/40 sm:py-20">
+      {/* Governance & Board Oversight */}
+      <section id="governance" className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
-            {/* Global Platform Strategy */}
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/20 bg-cobalt-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-cobalt-600 dark:text-cyan-400">
+              Institutional Governance Framework
+            </div>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+              {content.governance_heading || "Group Governance & Board Oversight"}
+            </h2>
+            <p className="mt-4 text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+              {content.governance_body ||
+                "Booking Network Global Group operates under strict fiduciary governance structured across three independent oversight councils: the Board Audit & Risk Committee, the Global Technology Architecture Advisory Council, and the AI Ethics & Sustainability Committee."}
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-7 dark:border-white/10 dark:bg-obsidian-900 shadow-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cobalt-50 text-cobalt-600 dark:bg-white/10 dark:text-cyan-400 mb-4">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Board Audit & Risk Committee
+              </h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Oversees institutional compliance, financial reporting integrity, and internal cybersecurity risk controls across all subsidiaries.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-7 dark:border-white/10 dark:bg-obsidian-900 shadow-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 dark:bg-white/10 dark:text-cyan-400 mb-4">
+                <Cpu className="h-5 w-5" />
+              </div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Tech Architecture Advisory Council
+              </h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Ratifies core infrastructure specifications, zero-trust protocols, cross-region mesh standards, and cloud availability criteria.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-7 dark:border-white/10 dark:bg-obsidian-900 shadow-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-white/10 dark:text-emerald-400 mb-4">
+                <Scale className="h-5 w-5" />
+              </div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                AI Ethics & Sustainability Committee
+              </h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Independent oversight ensuring algorithmic impartiality, carbon-aware compute scheduling, and universal digital accessibility.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Technology Roadmap (2026-2030) & R&D Areas */}
+      <section id="roadmap" className="py-20 bg-slate-50/60 dark:bg-obsidian-900/40 border-t border-slate-200/80 dark:border-white/5">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <div className="lg:col-span-6">
-              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-                <Layers className="h-4 w-4" />
-                Ecosystem Direction
+              <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/20 bg-cobalt-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-cobalt-600 dark:text-cyan-400">
+                2026–2030 Strategy
               </div>
-              <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                {content.strategy_heading || "Global Platform Strategy"}
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+                {content.strategy_heading || "Global Group Technology Roadmap"}
               </h2>
-              <div className="mt-5 space-y-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                {strategyParagraphs.map((p, idx) => (
-                  <p key={idx}>{p}</p>
+              <div className="mt-6 space-y-4 text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                {strategyParagraphs.map((para, idx) => (
+                  <p key={idx}>{para}</p>
                 ))}
-              </div>
-              <div className="mt-8">
-                <Link
-                  href="/platforms"
-                  className="inline-flex items-center gap-2 rounded-xl bg-navy-950 px-5 py-3 text-sm font-semibold text-white hover:bg-navy-800 dark:bg-electric-600 dark:hover:bg-electric-500 transition-colors"
-                >
-                  Explore All {platforms.length} Platforms
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
               </div>
             </div>
 
-            {/* Areas of Innovation */}
             <div className="lg:col-span-6">
-              <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-navy-900">
-                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-                  <Cpu className="h-4 w-4" />
-                  R&D Focus
-                </div>
-                <h2 className="mt-2 font-display text-2xl font-extrabold text-slate-900 dark:text-white">
-                  {content.innovation_heading || "Areas of Innovation"}
-                </h2>
-                <ul className="mt-6 space-y-4">
+              <div className="rounded-3xl border border-slate-200/90 bg-white p-8 dark:border-white/10 dark:bg-obsidian-900 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">
+                  {content.innovation_heading || "Key R&D Focus Areas"}
+                </h3>
+                <ul className="space-y-4">
                   {innovationItems.map((item, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-electric-600 dark:text-electric-400" />
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                      <CheckCircle2 className="h-5 w-5 text-cobalt-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                         {item}
                       </span>
                     </li>
@@ -331,29 +299,87 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* Corporate Contact CTA */}
-      <section className="bg-navy-950 py-16 text-white sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Connect With {companyName}
+      {/* Global Regional Hubs (#network) */}
+      <section id="network" className="py-20 border-t border-slate-200/80 dark:border-white/10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/20 bg-cobalt-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-cobalt-600 dark:text-cyan-400">
+              Global Regional Infrastructure
+            </div>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+              Global Regional Hubs & Operational Topology
+            </h2>
+            <p className="mt-4 text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+              Strategic operational, research, and regulatory centers coordinating sovereign platform operations across major global economic corridors.
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {globalHubs.map((hub) => (
+              <div
+                key={hub.city}
+                className="rounded-3xl border border-slate-200/90 bg-white p-6 dark:border-white/10 dark:bg-obsidian-900 shadow-sm flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="rounded-md bg-cobalt-50 dark:bg-white/10 px-2 py-0.5 text-[10px] font-mono font-bold text-cobalt-600 dark:text-cyan-400">
+                      {hub.region}
+                    </span>
+                    <span className="text-[10px] font-semibold text-emerald-500">
+                      ● {hub.status}
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    {hub.city}, {hub.country}
+                  </h3>
+                  <span className="text-xs font-semibold text-cobalt-600 dark:text-cyan-400 block mt-0.5">
+                    {hub.hub_type}
+                  </span>
+
+                  <p className="mt-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {hub.description}
+                  </p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5 space-y-2 text-xs text-slate-500 dark:text-slate-400">
+                  {hub.address && (
+                    <div className="flex items-start gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
+                      <span className="truncate">{hub.address}</span>
+                    </div>
+                  )}
+                  {hub.contact_email && (
+                    <div className="flex items-center gap-1.5">
+                      <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <a href={`mailto:${hub.contact_email}`} className="hover:text-cobalt-600 dark:hover:text-cyan-400">
+                        {hub.contact_email}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 bg-obsidian-950 text-white text-center border-t border-white/10">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-extrabold sm:text-4xl text-white">
+            Engage with Booking Network Global Group
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-base text-slate-300">
-            Have questions about our corporate ecosystem, strategic partnerships,
-            or individual platform initiatives? Reach out to our team directly.
+          <p className="mt-4 text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
+            Explore strategic partnership opportunities, investor relations briefings, or join our global technology research teams.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <div className="mt-8 flex justify-center gap-4">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 rounded-xl bg-electric-600 px-6 py-3.5 text-sm font-bold text-white hover:bg-electric-500 transition-colors"
+              className="inline-flex items-center gap-2 rounded-2xl bg-cobalt-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg hover:bg-cobalt-500 transition-colors"
             >
-              Contact Us
+              <span>Contact Group Leadership</span>
               <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/platforms"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-navy-900 px-6 py-3.5 text-sm font-semibold text-slate-200 hover:border-electric-400 hover:text-white transition-colors"
-            >
-              Browse Platform Portfolio
             </Link>
           </div>
         </div>
@@ -361,4 +387,3 @@ export default async function AboutPage() {
     </div>
   );
 }
-

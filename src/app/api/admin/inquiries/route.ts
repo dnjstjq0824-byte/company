@@ -19,7 +19,11 @@ export async function GET(request: NextRequest) {
     await logAdminActivity(
       admin.id,
       "EXPORT_INQUIRIES_CSV",
-      `Exported ${inquiries.length} contact inquiries to CSV`
+      `Exported ${inquiries.length} contact inquiries to CSV`,
+      {
+        ip_address: request.headers.get("x-forwarded-for") || "127.0.0.1",
+        user_agent: request.headers.get("user-agent") || "",
+      }
     );
 
     const escapeCsv = (val: unknown) => {
@@ -33,12 +37,15 @@ export async function GET(request: NextRequest) {
       "Email",
       "Company",
       "Inquiry Type",
+      "Department",
+      "Priority",
+      "Assigned To",
       "Subject",
       "Message",
       "Status",
       "Admin Notes",
       "Submitted At",
-      "Updated At",
+      "Resolved At",
     ];
 
     const rows = inquiries.map((inq) =>
@@ -48,12 +55,15 @@ export async function GET(request: NextRequest) {
         inq.email,
         inq.company || "",
         inq.inquiry_type,
+        inq.department || "",
+        inq.priority || "Normal",
+        inq.assigned_to || "",
         inq.subject,
         inq.message,
         inq.status,
         inq.admin_notes || "",
         inq.created_at.toISOString(),
-        inq.updated_at.toISOString(),
+        inq.resolved_at ? inq.resolved_at.toISOString() : "",
       ]
         .map(escapeCsv)
         .join(",")
@@ -65,7 +75,7 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="booking-network-inquiries-${new Date()
+        "Content-Disposition": `attachment; filename="booking-network-global-group-inquiries-${new Date()
           .toISOString()
           .slice(0, 10)}.csv"`,
       },
@@ -74,4 +84,3 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({ inquiries });
 }
-

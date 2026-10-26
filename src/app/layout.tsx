@@ -5,6 +5,7 @@ import { getAllSiteSettings, getPublishedPlatforms } from "@/lib/data";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CookieBanner } from "@/components/CookieBanner";
+import { LanguageProvider } from "@/lib/i18n";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,18 +21,18 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getAllSiteSettings();
-  const companyName = settings.company_name || "Booking Network Co., Ltd.";
+  const companyName = settings.company_name || "Booking Network Global Group";
   const title =
     settings.default_seo_title ||
-    `${companyName} | Global Digital Platform Ecosystem`;
+    `${companyName} — Official Global IT Platform Group Portal`;
   const description =
     settings.default_seo_description ||
-    "Official corporate portal of Booking Network Co., Ltd. — building a global ecosystem of digital platforms across commerce, travel, search, financial information, knowledge, video, and communication.";
+    "Official corporate portal of Booking Network Global Group — architecting the global digital backbone across cloud infrastructure, AI intelligence, B2B network mesh, and fintech trust architecture.";
 
   const baseUrl = (
     settings.website_domain ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "http://localhost:3000"
+    "https://bookingnetwork.com"
   ).replace(/\/$/, "");
 
   return {
@@ -80,11 +81,11 @@ export default async function RootLayout({
     getPublishedPlatforms(),
   ]);
 
-  const companyName = settings.company_name || "Booking Network Co., Ltd.";
+  const companyName = settings.company_name || "Booking Network Global Group";
   const baseUrl = (
     settings.website_domain ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "http://localhost:3000"
+    "https://bookingnetwork.com"
   ).replace(/\/$/, "");
 
   const socialUrls = [
@@ -100,11 +101,12 @@ export default async function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     name: companyName,
+    alternateName: "부킹네트워크글로벌그룹",
     url: baseUrl,
     logo: `${baseUrl}${settings.brand_logo || "/logos/booking-network.svg"}`,
     description:
       settings.brand_positioning ||
-      "A global digital technology company developing and connecting platforms that empower commerce, travel, information discovery, financial market exploration, content sharing, and communication.",
+      "Booking Network Global Group is a premier global IT platform group that architects, governs, and scales enterprise-grade digital infrastructure, intelligent network ecosystems, and cross-border platform technologies across global markets.",
   };
 
   if (settings.corporate_email?.trim()) {
@@ -117,44 +119,52 @@ export default async function RootLayout({
     organizationSchema.sameAs = socialUrls;
   }
 
+  const announcement = {
+    enabled: settings.global_announcement_enabled === "true",
+    text: settings.global_announcement_text || "",
+    link: settings.global_announcement_link || "/newsroom",
+  };
+
   return (
     <html
       lang="en"
       className={`${inter.variable} ${plusJakarta.variable}`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-screen flex-col font-sans">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-electric-600 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
-        >
-          Skip to main content
-        </a>
+      <body className="flex min-h-screen flex-col font-sans bg-white dark:bg-obsidian-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-cobalt-600 selection:text-white transition-colors duration-200">
+        <LanguageProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-cobalt-600 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+          >
+            Skip to main content
+          </a>
 
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationSchema),
-          }}
-        />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(organizationSchema),
+            }}
+          />
 
-        <Header
-          companyName={companyName}
-          brandLogo={settings.brand_logo}
-          platforms={platforms}
-        />
+          <Header
+            companyName={companyName}
+            brandLogo={settings.brand_logo}
+            platforms={platforms}
+            announcement={announcement}
+          />
 
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
 
-        <Footer settings={settings} platforms={platforms} />
+          <Footer settings={settings} platforms={platforms} />
 
-        <CookieBanner
-          enabled={settings.cookie_consent_enabled !== "false"}
-        />
+          <CookieBanner
+            enabled={settings.cookie_consent_enabled !== "false"}
+          />
+        </LanguageProvider>
       </body>
     </html>
   );
 }
-

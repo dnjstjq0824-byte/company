@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { ParsedPlatform, mapCategoryToFilterGroup } from "@/lib/data";
 import { PlatformCard } from "./PlatformCard";
+import { useLanguage } from "@/lib/i18n";
 
 const FILTER_GROUPS = [
-  "All Platforms",
-  "Commerce",
-  "Travel",
-  "Search & Knowledge",
-  "Financial Information",
-  "Media & Communication",
+  "All Divisions",
+  "Core Infrastructure",
+  "AI & Big Data",
+  "B2B Platform & API",
+  "FinTech & Cybersecurity",
+  "Platform Incubation",
+  "ESG & Governance",
 ];
 
 export function PlatformFilterGrid({
@@ -23,14 +25,15 @@ export function PlatformFilterGrid({
   enableSearch?: boolean;
   enableStatusFilter?: boolean;
 }) {
-  const [selectedGroup, setSelectedGroup] = useState("All Platforms");
+  const [selectedGroup, setSelectedGroup] = useState("All Divisions");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const { locale } = useLanguage();
 
   const filtered = useMemo(() => {
     return platforms.filter((platform) => {
       const matchesGroup =
-        selectedGroup === "All Platforms" ||
+        selectedGroup === "All Divisions" ||
         mapCategoryToFilterGroup(platform.category) === selectedGroup;
 
       const matchesStatus =
@@ -42,6 +45,7 @@ export function PlatformFilterGrid({
         !q ||
         platform.name.toLowerCase().includes(q) ||
         platform.category.toLowerCase().includes(q) ||
+        platform.division_code.toLowerCase().includes(q) ||
         platform.short_description.toLowerCase().includes(q);
 
       return matchesGroup && matchesStatus && matchesSearch;
@@ -55,7 +59,7 @@ export function PlatformFilterGrid({
         {/* Category Pills */}
         <div
           role="tablist"
-          aria-label="Filter platforms by business sector"
+          aria-label="Filter divisions by technology sector"
           className="flex flex-wrap items-center gap-2"
         >
           {FILTER_GROUPS.map((group) => {
@@ -67,10 +71,10 @@ export function PlatformFilterGrid({
                 role="tab"
                 aria-selected={active}
                 onClick={() => setSelectedGroup(group)}
-                className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
                   active
-                    ? "bg-electric-600 text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-700 hover:border-electric-400 hover:text-electric-600 dark:border-slate-800 dark:bg-navy-900 dark:text-slate-300 dark:hover:border-electric-500"
+                    ? "bg-cobalt-600 text-white shadow-md shadow-cobalt-600/20"
+                    : "border border-slate-200 bg-white text-slate-700 hover:border-cobalt-400 hover:text-cobalt-600 dark:border-white/10 dark:bg-obsidian-900 dark:text-slate-300 dark:hover:border-cyan-400 dark:hover:text-cyan-300"
                 }`}
               >
                 {group}
@@ -89,76 +93,52 @@ export function PlatformFilterGrid({
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search platform by name or sector..."
-                  aria-label="Search platforms by name or category"
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-electric-500 focus:outline-none dark:border-slate-800 dark:bg-navy-900 dark:text-white"
+                  placeholder={locale === "ko" ? "부문명, 코드, 분야 검색..." : "Search division by code or tech..."}
+                  className="w-full rounded-xl border border-slate-200 bg-white py-1.5 pl-10 pr-9 text-xs text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-900 dark:text-white"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    aria-label="Clear search query"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
             )}
 
             {enableStatusFilter && (
-              <div className="relative flex items-center">
-                <SlidersHorizontal className="pointer-events-none absolute left-3.5 h-4 w-4 text-slate-400" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  aria-label="Filter platforms by operational status"
-                  className="rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-8 text-sm font-medium text-slate-700 focus:border-electric-500 focus:outline-none dark:border-slate-800 dark:bg-navy-900 dark:text-slate-200"
-                >
-                  <option value="All Statuses">All Statuses</option>
-                  <option value="Live">Live</option>
-                  <option value="Coming Soon">Coming Soon</option>
-                  <option value="In Development">In Development</option>
-                  <option value="Temporarily Unavailable">
-                    Temporarily Unavailable
-                  </option>
-                </select>
-              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-900 dark:text-slate-200"
+              >
+                <option value="All Statuses">All Operational Statuses</option>
+                <option value="Core Architecture">Core Architecture</option>
+                <option value="Live">Live</option>
+                <option value="Expanding">Expanding</option>
+                <option value="R&D Phase">R&D Phase</option>
+              </select>
             )}
           </div>
         )}
       </div>
 
-      {/* Results Grid or Empty State */}
-      {filtered.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((platform) => (
-            <PlatformCard key={platform.id} platform={platform} />
-          ))}
+      {/* Grid of Division Cards */}
+      {filtered.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-slate-300 py-16 text-center dark:border-white/15">
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            {locale === "ko" ? "선택한 조건의 기술 부문이 없습니다." : "No business & technology divisions match your criteria."}
+          </p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-12 text-center dark:border-slate-800 dark:bg-navy-900/40">
-          <p className="text-base font-semibold text-slate-900 dark:text-white">
-            No matching platforms found
-          </p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Try clearing your search query or selecting a different business
-            category.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedGroup("All Platforms");
-              setSearchQuery("");
-              setStatusFilter("All Statuses");
-            }}
-            className="mt-4 inline-flex items-center rounded-xl bg-electric-600 px-4 py-2 text-xs font-semibold text-white hover:bg-electric-700 transition-colors"
-          >
-            Reset Filters
-          </button>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((platform) => (
+            <PlatformCard key={platform.slug} platform={platform} />
+          ))}
         </div>
       )}
     </div>
   );
 }
-

@@ -3,25 +3,37 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { CheckCircle2, AlertCircle, Send, Loader2 } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 const INQUIRY_TYPES = [
-  "General Inquiry",
-  "Business Partnership",
-  "Platform Collaboration",
-  "Advertising & Marketing",
-  "Technical / Website Issue",
-  "Other",
+  "Strategic Partnership",
+  "Investor Relations (IR)",
+  "Media & Press",
+  "Enterprise Technology & API",
+  "Global Careers",
+  "General Corporate Inquiry",
+];
+
+const DEPARTMENTS = [
+  "Global Partnership & Alliances",
+  "Investor Relations (IR)",
+  "Corporate Communications & PR",
+  "Technology & Architecture Council",
+  "Executive Office",
+  "Legal & Regulatory Compliance",
 ];
 
 export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
+  const [department, setDepartment] = useState("Global Partnership & Alliances");
   const [inquiryType, setInquiryType] = useState(
-    initialPlatform ? "Platform Collaboration" : "General Inquiry"
+    initialPlatform ? "Strategic Partnership" : "Strategic Partnership"
   );
+  const [priority, setPriority] = useState("Normal");
   const [subject, setSubject] = useState(
-    initialPlatform ? `Inquiry regarding ${initialPlatform}` : ""
+    initialPlatform ? `Strategic inquiry regarding ${initialPlatform}` : ""
   );
   const [message, setMessage] = useState("");
   const [privacyConsent, setPrivacyConsent] = useState(false);
@@ -31,6 +43,7 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submittedMessage, setSubmittedMessage] = useState("");
+  const { locale, t } = useLanguage();
 
   const validateClient = () => {
     const errors: Record<string, string> = {};
@@ -77,7 +90,9 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
           full_name: fullName.trim(),
           email: email.trim(),
           company: company.trim(),
+          department: department.trim(),
           inquiry_type: inquiryType,
+          priority,
           subject: subject.trim(),
           message: message.trim(),
           privacy_consent: privacyConsent,
@@ -100,7 +115,7 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
 
       setSubmittedMessage(
         data.message ||
-          "Thank you for contacting Booking Network Co., Ltd. Your message has been received. Our team will review your inquiry."
+          "Thank you for contacting Booking Network Global Group. Your inquiry has been received."
       );
       setFullName("");
       setEmail("");
@@ -111,7 +126,7 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
       setFieldErrors({});
     } catch {
       setErrorMessage(
-        "A network error occurred while sending your message. Please try again."
+        "A network error occurred. Please try again or email contact@bookingnetwork.com directly."
       );
     } finally {
       setSubmitting(false);
@@ -120,26 +135,22 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
 
   if (submittedMessage) {
     return (
-      <div
-        role="status"
-        aria-live="polite"
-        className="rounded-3xl border border-emerald-200 bg-emerald-50/70 p-8 text-center dark:border-emerald-800/70 dark:bg-emerald-950/30"
-      >
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm">
-          <CheckCircle2 className="h-8 w-8" />
+      <div className="rounded-3xl border border-emerald-500/20 bg-emerald-50/50 p-8 dark:border-emerald-500/30 dark:bg-emerald-950/20 text-center animate-in fade-in duration-300">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/30">
+          <CheckCircle2 className="h-7 w-7" />
         </div>
-        <h3 className="mt-5 font-display text-2xl font-extrabold text-slate-900 dark:text-white">
-          Inquiry Received
+        <h3 className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">
+          {locale === "ko" ? "문의가 정상 접수되었습니다" : "Inquiry Successfully Logged"}
         </h3>
-        <p className="mx-auto mt-3 max-w-lg text-base leading-relaxed text-slate-700 dark:text-slate-200">
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto">
           {submittedMessage}
         </p>
         <button
           type="button"
           onClick={() => setSubmittedMessage("")}
-          className="mt-6 inline-flex items-center rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-navy-900 dark:text-slate-200"
+          className="mt-6 rounded-xl bg-cobalt-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-cobalt-500 transition-colors"
         >
-          Submit Another Inquiry
+          {locale === "ko" ? "추가 문의 작성하기" : "Submit Another Inquiry"}
         </button>
       </div>
     );
@@ -149,246 +160,213 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm dark:border-slate-800 dark:bg-navy-900 sm:p-9"
+      className="rounded-3xl border border-slate-200/90 bg-white p-7 sm:p-10 shadow-sm dark:border-white/10 dark:bg-obsidian-900"
     >
-      <h2 className="font-display text-2xl font-extrabold text-slate-900 dark:text-white">
-        Send Us a Message
+      {/* Honeypot anti-bot hidden field */}
+      <input
+        type="text"
+        name="website_honeypot"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        className="hidden"
+        aria-hidden="true"
+      />
+
+      <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
+        {locale === "ko" ? "공식 제휴 및 기업 문의 양식" : "Enterprise Inquiry Submission"}
       </h2>
-      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        Fields marked with an asterisk (*) are required.
+      <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        {locale === "ko"
+          ? "모든 제출 내용은 암호화되어 해당 거버넌스 부서로 직접 전달됩니다."
+          : "All submissions are securely encrypted, timestamped, and routed to the corresponding group division."}
       </p>
 
       {errorMessage && (
-        <div
-          role="alert"
-          className="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/70 dark:bg-red-950/50 dark:text-red-300"
-        >
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-          <span>{errorMessage}</span>
+        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-rose-500/20 bg-rose-50 p-4 text-xs sm:text-sm text-rose-800 dark:border-rose-500/30 dark:bg-rose-950/30 dark:text-rose-300">
+          <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
+          <p>{errorMessage}</p>
         </div>
       )}
 
-      {/* Honeypot anti-spam field (hidden from real users) */}
-      <div className="hidden" aria-hidden="true">
-        <label htmlFor="website_honeypot">Website</label>
-        <input
-          id="website_honeypot"
-          type="text"
-          tabIndex={-1}
-          autoComplete="off"
-          value={honeypot}
-          onChange={(e) => setHoneypot(e.target.value)}
-        />
-      </div>
-
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
         {/* Full Name */}
         <div>
-          <label
-            htmlFor="full_name"
-            className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300"
-          >
-            Full Name *
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            Full Name <span className="text-rose-500">*</span>
           </label>
           <input
-            id="full_name"
-            name="full_name"
             type="text"
             required
-            maxLength={120}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Jane Doe"
-            aria-invalid={Boolean(fieldErrors.full_name)}
-            className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 focus:border-electric-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-navy-950 dark:text-white"
+            placeholder="e.g. Sarah Jenkins"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
           />
           {fieldErrors.full_name && (
-            <p className="mt-1 text-xs font-medium text-red-600 dark:text-red-400">
-              {fieldErrors.full_name}
-            </p>
+            <p className="mt-1 text-xs text-rose-500">{fieldErrors.full_name}</p>
           )}
         </div>
 
-        {/* Email Address */}
+        {/* Corporate Email */}
         <div>
-          <label
-            htmlFor="email"
-            className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300"
-          >
-            Email Address *
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            Corporate Email <span className="text-rose-500">*</span>
           </label>
           <input
-            id="email"
-            name="email"
             type="email"
             required
-            maxLength={160}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@organization.com"
-            aria-invalid={Boolean(fieldErrors.email)}
-            className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 focus:border-electric-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-navy-950 dark:text-white"
+            placeholder="sarah@enterprise.com"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
           />
           {fieldErrors.email && (
-            <p className="mt-1 text-xs font-medium text-red-600 dark:text-red-400">
-              {fieldErrors.email}
-            </p>
+            <p className="mt-1 text-xs text-rose-500">{fieldErrors.email}</p>
           )}
         </div>
 
         {/* Company / Organization */}
         <div>
-          <label
-            htmlFor="company"
-            className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300"
-          >
-            Company / Organization (Optional)
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            Company / Organization
           </label>
           <input
-            id="company"
-            name="company"
             type="text"
-            maxLength={150}
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            placeholder="Organization Ltd."
-            className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 focus:border-electric-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-navy-950 dark:text-white"
+            placeholder="e.g. Apex Global Systems Ltd."
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
           />
         </div>
 
-        {/* Inquiry Type */}
+        {/* Routing Department */}
         <div>
-          <label
-            htmlFor="inquiry_type"
-            className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300"
-          >
-            Inquiry Type *
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            Target Group Department
           </label>
           <select
-            id="inquiry_type"
-            name="inquiry_type"
-            required
-            value={inquiryType}
-            onChange={(e) => setInquiryType(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 focus:border-electric-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-navy-950 dark:text-white"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
           >
-            {INQUIRY_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
+            {DEPARTMENTS.map((dept) => (
+              <option key={dept} value={dept}>
+                {dept}
               </option>
             ))}
           </select>
-          {fieldErrors.inquiry_type && (
-            <p className="mt-1 text-xs font-medium text-red-600 dark:text-red-400">
-              {fieldErrors.inquiry_type}
-            </p>
+        </div>
+
+        {/* Inquiry Classification */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            Inquiry Category <span className="text-rose-500">*</span>
+          </label>
+          <select
+            value={inquiryType}
+            onChange={(e) => setInquiryType(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
+          >
+            {INQUIRY_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Priority Tier */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            Engagement Priority
+          </label>
+          <select
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
+          >
+            <option value="Normal">Normal — Standard Business Review</option>
+            <option value="High">High — Active Transaction / RFP</option>
+            <option value="Urgent">Urgent — Executive / Regulatory Priority</option>
+            <option value="Low">Low — General Informational</option>
+          </select>
+        </div>
+
+        {/* Subject */}
+        <div className="sm:col-span-2">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            Subject <span className="text-rose-500">*</span>
+          </label>
+          <input
+            type="text"
+            required
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Summary of proposed collaboration or inquiry..."
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
+          />
+          {fieldErrors.subject && (
+            <p className="mt-1 text-xs text-rose-500">{fieldErrors.subject}</p>
+          )}
+        </div>
+
+        {/* Detailed Message */}
+        <div className="sm:col-span-2">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            Message Body <span className="text-rose-500">*</span>
+          </label>
+          <textarea
+            required
+            rows={5}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Please detail your scope, requirements, organization background, and timeline..."
+            className="w-full rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white leading-relaxed"
+          />
+          {fieldErrors.message && (
+            <p className="mt-1 text-xs text-rose-500">{fieldErrors.message}</p>
+          )}
+        </div>
+
+        {/* Privacy Consent Checkbox */}
+        <div className="sm:col-span-2">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={privacyConsent}
+              onChange={(e) => setPrivacyConsent(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-cobalt-600 focus:ring-cobalt-500 dark:border-white/20 dark:bg-obsidian-950"
+            />
+            <span className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              I consent to Booking Network Global Group processing the submitted corporate data in accordance with the{" "}
+              <Link href="/privacy" className="text-cobalt-600 dark:text-cyan-400 underline font-semibold" target="_blank">
+                Privacy Policy & Data Governance Charter
+              </Link>
+              . We do not sell or transfer inquiry information to external commercial parties.
+            </span>
+          </label>
+          {fieldErrors.privacy_consent && (
+            <p className="mt-1 text-xs text-rose-500">{fieldErrors.privacy_consent}</p>
           )}
         </div>
       </div>
 
-      {/* Subject */}
-      <div className="mt-5">
-        <label
-          htmlFor="subject"
-          className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300"
-        >
-          Subject *
-        </label>
-        <input
-          id="subject"
-          name="subject"
-          type="text"
-          required
-          maxLength={200}
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          placeholder="How can Booking Network Co., Ltd. assist you?"
-          aria-invalid={Boolean(fieldErrors.subject)}
-          className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 focus:border-electric-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-navy-950 dark:text-white"
-        />
-        {fieldErrors.subject && (
-          <p className="mt-1 text-xs font-medium text-red-600 dark:text-red-400">
-            {fieldErrors.subject}
-          </p>
-        )}
-      </div>
-
-      {/* Message */}
-      <div className="mt-5">
-        <div className="flex items-center justify-between">
-          <label
-            htmlFor="message"
-            className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300"
-          >
-            Message *
-          </label>
-          <span className="text-[11px] text-slate-400">
-            {message.length} / 5000
-          </span>
-        </div>
-        <textarea
-          id="message"
-          name="message"
-          required
-          rows={5}
-          maxLength={5000}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Please describe your partnership proposal, platform question, or corporate inquiry..."
-          aria-invalid={Boolean(fieldErrors.message)}
-          className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 focus:border-electric-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-navy-950 dark:text-white"
-        />
-        {fieldErrors.message && (
-          <p className="mt-1 text-xs font-medium text-red-600 dark:text-red-400">
-            {fieldErrors.message}
-          </p>
-        )}
-      </div>
-
-      {/* Privacy Consent */}
-      <div className="mt-6">
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={privacyConsent}
-            onChange={(e) => setPrivacyConsent(e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-slate-300 text-electric-600 focus:ring-electric-500"
-          />
-          <span className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-            I consent to <strong>Booking Network Co., Ltd.</strong> collecting
-            and processing the information submitted in this form for the
-            purpose of reviewing and responding to my inquiry, in accordance
-            with the{" "}
-            <Link
-              href="/privacy"
-              className="font-semibold text-electric-600 underline hover:text-electric-700 dark:text-electric-400"
-            >
-              Privacy Policy
-            </Link>
-            . *
-          </span>
-        </label>
-        {fieldErrors.privacy_consent && (
-          <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
-            {fieldErrors.privacy_consent}
-          </p>
-        )}
-      </div>
-
-      <div className="mt-7">
+      <div className="mt-8 flex justify-end">
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-electric-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-electric-700 disabled:opacity-60 sm:w-auto transition-all"
+          className="inline-flex items-center gap-2 rounded-2xl bg-cobalt-600 px-7 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-cobalt-600/25 hover:bg-cobalt-500 disabled:opacity-50 transition-all hover:scale-[1.02]"
         >
           {submitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Sending Inquiry...
+              <span>Transmitting Encrypted Payload...</span>
             </>
           ) : (
             <>
-              Submit Inquiry
+              <span>{locale === "ko" ? "문의 접수하기" : "Transmit Strategic Inquiry"}</span>
               <Send className="h-4 w-4" />
             </>
           )}
@@ -397,4 +375,3 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
     </form>
   );
 }
-

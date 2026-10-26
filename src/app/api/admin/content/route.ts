@@ -83,7 +83,11 @@ export async function PUT(request: NextRequest) {
     await logAdminActivity(
       admin.id,
       "UPDATE_CONTENT_PAGE",
-      `Updated website content page '${page_slug}'`
+      `Updated website content page '${page_slug}'`,
+      {
+        ip_address: request.headers.get("x-forwarded-for") || "127.0.0.1",
+        user_agent: request.headers.get("user-agent") || "",
+      }
     );
 
     revalidatePath("/");
@@ -104,4 +108,3 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
-

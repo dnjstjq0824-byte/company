@@ -102,7 +102,12 @@ export async function getAuthenticatedAdmin() {
 export async function logAdminActivity(
   adminId: string,
   action: string,
-  target: string
+  target: string,
+  options?: {
+    ip_address?: string | null;
+    user_agent?: string | null;
+    metadata?: string | null;
+  }
 ) {
   try {
     await prisma.adminActivityLog.create({
@@ -110,6 +115,9 @@ export async function logAdminActivity(
         admin_id: adminId,
         action,
         target,
+        ip_address: options?.ip_address ?? null,
+        user_agent: options?.user_agent ?? null,
+        metadata: options?.metadata ?? null,
       },
     });
   } catch (err) {

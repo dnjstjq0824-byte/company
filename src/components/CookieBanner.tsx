@@ -47,7 +47,7 @@ export function CookieBanner({ enabled = true }: { enabled?: boolean }) {
               Privacy & Cookie Preferences
             </p>
             <p className="mt-0.5">
-              Booking Network Co., Ltd. uses strictly necessary technical storage
+              Booking Network Global Group uses strictly necessary technical storage
               to remember your display and privacy preferences. Non-essential
               cookies remain disabled unless you explicitly opt in. Read our{" "}
               <Link

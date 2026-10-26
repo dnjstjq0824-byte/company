@@ -2,25 +2,26 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   ArrowRight,
-  ShoppingBag,
-  Compass,
-  Search,
-  LineChart,
-  BookOpen,
-  Video,
-  Network,
-  Shield,
+  ShieldCheck,
   Globe2,
-  Layers,
+  Server,
+  Zap,
+  ArrowUpRight,
+  Building2,
+  Sparkles,
+  ExternalLink,
 } from "lucide-react";
 import {
   getPublishedPlatforms,
   getContentPageBySlug,
   getAllSiteSettings,
-  mapCategoryToFilterGroup,
+  getPublishedNewsPosts,
 } from "@/lib/data";
 import { PlatformFilterGrid } from "@/components/PlatformFilterGrid";
-import { StatusBadge } from "@/components/StatusBadge";
+import { NetworkTopologyMatrix } from "@/components/NetworkTopologyMatrix";
+import { BentoGrid } from "@/components/BentoGrid";
+import { ArchitectureBlueprint } from "@/components/ArchitectureBlueprint";
+import { NewsroomSection } from "@/components/NewsroomSection";
 
 export const dynamic = "force-dynamic";
 
@@ -32,14 +33,9 @@ interface HomeContent {
   hero_primary_cta_link?: string;
   hero_secondary_cta_text?: string;
   hero_secondary_cta_link?: string;
+  hero_metrics?: Array<{ label: string; value: string }>;
   about_heading?: string;
   about_body?: string;
-  business_areas?: Array<{
-    id: string;
-    title: string;
-    description: string;
-    icon: string;
-  }>;
   ecosystem_heading?: string;
   ecosystem_subtitle?: string;
   partnership_headline?: string;
@@ -53,460 +49,201 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title:
       page?.seo_metadata?.title ||
-      "Booking Network Co., Ltd. — One Network. A World of Digital Possibilities.",
+      "Booking Network Global Group — Architecting the Global Digital Backbone",
     description:
       page?.seo_metadata?.description ||
-      "Booking Network Co., Ltd. is building a global ecosystem of digital platforms connecting commerce, travel, search, knowledge, financial information, entertainment, and communication.",
+      "Official corporate portal of Booking Network Global Group. Architecting enterprise digital infrastructure, AI intelligence, and connected global platforms.",
     alternates: { canonical: "/" },
   };
 }
 
-function getBusinessIcon(iconName: string) {
-  switch (iconName) {
-    case "ShoppingBag":
-      return ShoppingBag;
-    case "Compass":
-      return Compass;
-    case "Search":
-      return Search;
-    case "LineChart":
-      return LineChart;
-    case "BookOpen":
-      return BookOpen;
-    case "Video":
-      return Video;
-    default:
-      return Layers;
-  }
-}
-
 export default async function HomePage() {
-  const [platforms, pageData, settings] = await Promise.all([
+  const [platforms, newsPosts, pageData, settings] = await Promise.all([
     getPublishedPlatforms(),
+    getPublishedNewsPosts(4),
     getContentPageBySlug<HomeContent>("home"),
     getAllSiteSettings(),
   ]);
 
   const content = pageData?.content || {};
-  const companyName = settings.company_name || "Booking Network Co., Ltd.";
+  const companyName = settings.company_name || "Booking Network Global Group";
   const tagline =
-    settings.tagline || "Connecting Platforms. Expanding Possibilities.";
+    settings.tagline ||
+    "Architecting the Global Digital Backbone. Connecting Next-Generation Platforms.";
 
-  const businessAreas = content.business_areas || [
-    {
-      id: "commerce",
-      title: "Global Commerce",
-      description:
-        "Open digital marketplace architectures designed to connect merchants, brands, and buyers across international markets.",
-      icon: "ShoppingBag",
-    },
-    {
-      id: "travel",
-      title: "Travel Technology",
-      description:
-        "Online travel booking and multi-provider metasearch platforms that simplify global itinerary planning and comparison.",
-      icon: "Compass",
-    },
-    {
-      id: "search",
-      title: "Search & Information Discovery",
-      description:
-        "General web search technology engineered to index and surface relevant digital resources with clarity and speed.",
-      icon: "Search",
-    },
-    {
-      id: "finance",
-      title: "Financial Market Information",
-      description:
-        "Specialized metasearch and market discovery portals for global equities and cryptocurrency market data.",
-      icon: "LineChart",
-    },
-    {
-      id: "knowledge",
-      title: "Knowledge Platforms",
-      description:
-        "Collaborative encyclopedic and structured reference systems that organize complex subjects into accessible topic trees.",
-      icon: "BookOpen",
-    },
-    {
-      id: "media",
-      title: "Digital Media & Communication",
-      description:
-        "Next-generation platforms for on-demand video, short-form creative storytelling, and real-time digital messaging.",
-      icon: "Video",
-    },
-  ];
-
-  const sectorGroups = [
-    "Commerce",
-    "Travel",
-    "Financial Information",
-    "Search & Knowledge",
-    "Media & Communication",
+  const heroMetrics = content.hero_metrics || [
+    { label: "Core Tech Divisions", value: "6 Pillars" },
+    { label: "Global Edge Regions", value: "45+ POPs" },
+    { label: "Carrier-Grade Availability", value: "99.999% SLA" },
+    { label: "Zero-Trust Security Coverage", value: "100% ZTA" },
   ];
 
   return (
-    <div>
-      {/* SECTION A — HERO */}
-      <section className="relative overflow-hidden bg-navy-950 py-20 text-white lg:py-28">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-electric-600/20 via-navy-900/40 to-navy-950"
-        />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-12">
-            {/* Hero Copy */}
-            <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-electric-500/30 bg-electric-500/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest text-electric-300">
-                <span className="h-2 w-2 rounded-full bg-electric-400" />
-                {content.hero_badge || tagline}
+    <div className="flex flex-col">
+      {/* ============================================================ */}
+      {/* SECTION 1: EXECUTIVE GLOBAL GROUP HERO & TOPOLOGY MATRIX */}
+      {/* ============================================================ */}
+      <section className="relative overflow-hidden bg-white pt-12 pb-20 dark:bg-obsidian-950 transition-colors">
+        {/* Subtle mesh background */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-cobalt-500/10 dark:bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none" />
+
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-center">
+            {/* Left Hero Copy */}
+            <div className="lg:col-span-6 max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/30 bg-cobalt-500/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-cobalt-600 dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-400">
+                <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                <span>
+                  {content.hero_badge ||
+                    "BOOKING NETWORK GLOBAL GROUP • GLOBAL IT PLATFORM HOLDING"}
+                </span>
               </div>
 
-              <h1 className="mt-6 font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.1]">
-                {content.hero_headline ||
-                  "One Network. A World of Digital Possibilities."}
+              <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+                {content.hero_headline || "Architecting the Global Digital Backbone."}
               </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300 sm:text-xl">
+              <p className="mt-6 text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                 {content.hero_supporting_text ||
-                  "Booking Network Co., Ltd. is building a global ecosystem of digital platforms connecting commerce, travel, search, knowledge, financial information, entertainment, and communication."}
+                  "Booking Network Global Group architects, governs, and scales mission-critical digital infrastructure, intelligent data engines, and cross-border platform ecosystems connecting global enterprise markets."}
               </p>
 
-              <div className="mt-9 flex flex-wrap items-center gap-4">
+              {/* Hero Action CTAs */}
+              <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link
                   href={content.hero_primary_cta_link || "/platforms"}
-                  className="inline-flex items-center gap-2 rounded-xl bg-electric-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-electric-600/25 hover:bg-electric-500 transition-all"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-cobalt-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-cobalt-600/25 hover:bg-cobalt-500 transition-all hover:scale-[1.02]"
                 >
-                  {content.hero_primary_cta_text || "Explore Our Platforms"}
+                  <span>{content.hero_primary_cta_text || "Explore Core Divisions"}</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
+
                 <Link
                   href={content.hero_secondary_cta_link || "/contact"}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-navy-900/80 px-6 py-3.5 text-sm font-semibold text-slate-200 hover:border-electric-400 hover:text-white transition-all"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white/80 px-6 py-3.5 text-sm font-bold text-slate-800 hover:bg-slate-100 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 transition-colors"
                 >
-                  {content.hero_secondary_cta_text || "Contact Us"}
+                  <span>{content.hero_secondary_cta_text || "Global Partnerships & IR"}</span>
+                  <ArrowUpRight className="h-4 w-4" />
                 </Link>
               </div>
 
-              <div className="mt-12 grid grid-cols-3 gap-6 border-t border-slate-800/80 pt-8">
-                <div>
-                  <p className="text-2xl font-extrabold text-white">
-                    {platforms.length}
-                  </p>
-                  <p className="mt-0.5 text-xs font-medium text-slate-400">
-                    Digital Platforms in Portfolio
-                  </p>
-                </div>
-                <div>
-                  <p className="text-2xl font-extrabold text-white">6</p>
-                  <p className="mt-0.5 text-xs font-medium text-slate-400">
-                    Core Digital Sectors
-                  </p>
-                </div>
-                <div>
-                  <p className="text-2xl font-extrabold text-electric-400">
-                    Global
-                  </p>
-                  <p className="mt-0.5 text-xs font-medium text-slate-400">
-                    Multi-Market Architecture
-                  </p>
-                </div>
+              {/* Executive Subtitle Badge */}
+              <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-white/10 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                <Building2 className="h-4 w-4 text-cobalt-600 dark:text-cyan-400 shrink-0" />
+                <span>
+                  Headquartered in Seoul • Operational Hubs in San Jose, Frankfurt & Dubai
+                </span>
               </div>
             </div>
 
-            {/* Hero Interactive Ecosystem Visual */}
-            <div className="lg:col-span-5">
-              <div className="relative rounded-3xl border border-slate-800 bg-navy-900/80 p-6 shadow-2xl backdrop-blur-md">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-electric-600/20 text-electric-400">
-                      <Network className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-electric-400">
-                        Corporate Umbrella
-                      </p>
-                      <p className="text-sm font-bold text-white">
-                        {companyName}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="rounded-full border border-slate-700 bg-navy-950 px-2.5 py-1 text-[11px] font-medium text-slate-300">
-                    Portfolio Hub
+            {/* Right Interactive Visual: Network Topology Control Matrix */}
+            <div className="lg:col-span-6">
+              <NetworkTopologyMatrix />
+            </div>
+          </div>
+
+          {/* Executive Key Metrics Bar */}
+          <div className="mt-16 rounded-3xl border border-slate-200/90 bg-slate-50/70 p-6 sm:p-8 dark:border-white/10 dark:bg-obsidian-900/70 shadow-sm backdrop-blur-xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-white/10">
+              {heroMetrics.map((metric, idx) => (
+                <div key={idx} className={idx !== 0 ? "pt-4 sm:pt-0 sm:pl-6" : ""}>
+                  <span className="block text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight">
+                    {metric.value}
+                  </span>
+                  <span className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">
+                    {metric.label}
                   </span>
                 </div>
-
-                <div className="mt-5 grid grid-cols-2 gap-2.5">
-                  {platforms.slice(0, 10).map((p) => (
-                    <Link
-                      key={p.id}
-                      href={`/platforms/${p.slug}`}
-                      className="group flex items-center gap-2.5 rounded-xl border border-slate-800/90 bg-navy-950/90 p-2.5 transition-all hover:border-electric-500/60 hover:bg-navy-900"
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-navy-900 p-1">
-                        {p.logo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={p.logo}
-                            alt=""
-                            className="h-full w-full object-contain"
-                          />
-                        ) : (
-                          <span className="text-[10px] font-bold text-electric-400">
-                            {p.name.slice(0, 2)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-xs font-bold text-white group-hover:text-electric-400 transition-colors">
-                          {p.name}
-                        </p>
-                        <p className="truncate text-[10px] text-slate-400">
-                          {p.category}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-
-                <div className="mt-5 rounded-xl border border-slate-800/80 bg-navy-950/60 px-3.5 py-2.5 text-center text-[11px] text-slate-400">
-                  Independent Platforms • Dedicated Identities • Shared Vision
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION B — ABOUT BOOKING NETWORK */}
-      <section className="border-b border-slate-200/80 bg-white py-20 dark:border-slate-800/80 dark:bg-navy-950">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
-            <div className="lg:col-span-7">
-              <span className="text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-                Corporate Identity
-              </span>
-              <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                {content.about_heading ||
-                  "Building Connections Across Digital Industries"}
-              </h2>
-              <p className="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
-                {content.about_body ||
-                  "Booking Network Co., Ltd. develops independent digital platforms while creating opportunities for discovery, access, and connectivity across its broader ecosystem."}
-              </p>
-              <div className="mt-7">
-                <Link
-                  href="/about"
-                  className="inline-flex items-center gap-2 text-sm font-bold text-electric-600 hover:text-electric-700 dark:text-electric-400 dark:hover:text-electric-300"
-                >
-                  Read Our Full Corporate Story & Vision
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </div>
+      {/* ============================================================ */}
+      {/* SECTION 2: GROUP IDENTITY & GOVERNANCE BENTO GRID */}
+      {/* ============================================================ */}
+      <BentoGrid />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-5">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-6 dark:border-slate-800 dark:bg-navy-900">
-                <Globe2 className="h-7 w-7 text-electric-600 dark:text-electric-400" />
-                <h3 className="mt-4 text-base font-bold text-slate-900 dark:text-white">
-                  Independent Services
-                </h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                  Each platform retains its own specialized brand, domain
-                  identity, and dedicated operational infrastructure.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-6 dark:border-slate-800 dark:bg-navy-900">
-                <Shield className="h-7 w-7 text-electric-600 dark:text-electric-400" />
-                <h3 className="mt-4 text-base font-bold text-slate-900 dark:text-white">
-                  Strategic Governance
-                </h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                  Booking Network Co., Ltd. provides long-term product
-                  direction, quality standards, and multi-sector synergy.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION C — OUR PLATFORMS */}
-      <section className="bg-slate-50/70 py-20 dark:bg-navy-900/40">
+      {/* ============================================================ */}
+      {/* SECTION 3: 6 CORE BUSINESS & TECHNOLOGY DIVISIONS */}
+      {/* ============================================================ */}
+      <section className="py-20 bg-white dark:bg-obsidian-950 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-                Platform Portfolio
-              </span>
-              <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                Our Platforms
+              <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/20 bg-cobalt-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cobalt-600 dark:text-cyan-400">
+                Core Platform Architecture
+              </div>
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+                {content.ecosystem_heading || "The 6 Core Business & Technology Divisions"}
               </h2>
-              <p className="mt-2 max-w-2xl text-base text-slate-600 dark:text-slate-300">
-                Explore the digital platforms developed and stewarded by{" "}
-                {companyName}. Filter by business category to learn more about
-                each initiative.
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
+                {content.ecosystem_subtitle ||
+                  "Engineered for sovereign operational excellence, sub-millisecond edge latency, and unyielding enterprise security standards."}
               </p>
             </div>
+
             <Link
               href="/platforms"
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-electric-600 hover:underline dark:text-electric-400"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-cobalt-600 hover:text-cobalt-700 dark:text-cyan-400 dark:hover:text-cyan-300"
             >
-              Open Full Platform Directory
+              <span>View Full Division Directory</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
-          <PlatformFilterGrid platforms={platforms} />
+          <PlatformFilterGrid platforms={platforms} enableSearch enableStatusFilter />
         </div>
       </section>
 
-      {/* SECTION D — OUR BUSINESS AREAS */}
-      <section className="border-t border-slate-200/80 bg-white py-20 dark:border-slate-800/80 dark:bg-navy-950">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-              Core Competencies
-            </span>
-            <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-              Our Business Areas
-            </h2>
-            <p className="mt-3 text-base text-slate-600 dark:text-slate-300">
-              Our platform ecosystem focuses on six foundational digital
-              industries that connect people with commerce, travel, knowledge,
-              and communication.
-            </p>
+      {/* ============================================================ */}
+      {/* SECTION 4: GLOBAL NETWORK & ARCHITECTURE BLUEPRINT */}
+      {/* ============================================================ */}
+      <ArchitectureBlueprint />
+
+      {/* ============================================================ */}
+      {/* SECTION 5: LATEST GROUP NEWSROOM & IR HIGHLIGHTS */}
+      {/* ============================================================ */}
+      <NewsroomSection posts={newsPosts} />
+
+      {/* ============================================================ */}
+      {/* SECTION 6: GLOBAL STRATEGIC ALLIANCE & PARTNERSHIP CTA */}
+      {/* ============================================================ */}
+      <section className="py-20 bg-gradient-to-b from-obsidian-950 via-obsidian-900 to-obsidian-950 text-white border-t border-white/10 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-cobalt-600/15 rounded-full blur-[140px] pointer-events-none" />
+
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8 relative">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cyan-400">
+            Global Enterprise Alliance
           </div>
 
-          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {businessAreas.map((area, idx) => {
-              const IconComponent = getBusinessIcon(area.icon);
-              return (
-                <div
-                  key={area.id || idx}
-                  className="rounded-2xl border border-slate-200/90 bg-slate-50/50 p-7 transition-colors hover:border-electric-500/40 dark:border-slate-800 dark:bg-navy-900/60"
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-electric-600/10 text-electric-600 dark:bg-electric-500/15 dark:text-electric-400">
-                    <IconComponent className="h-6 w-6" />
-                  </div>
-                  <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-white">
-                    {area.title}
-                  </h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                    {area.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION E — CONNECTED ECOSYSTEM */}
-      <section className="border-t border-slate-200/80 bg-slate-50 py-20 dark:border-slate-800/80 dark:bg-navy-900/50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-electric-600 dark:text-electric-400">
-              Ecosystem Architecture
-            </span>
-            <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-              {content.ecosystem_heading ||
-                "An Umbrella of Independently Operated Platforms"}
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
-              {content.ecosystem_subtitle ||
-                "Booking Network Co., Ltd. serves as the central corporate entity behind ten specialized platforms. Each service operates with independent branding, dedicated domain routing, and distinct technical infrastructure—ensuring specialized excellence without conflating user accounts or operational boundaries."}
-            </p>
-          </div>
-
-          {/* Visual Corporate Umbrella Diagram */}
-          <div className="mt-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-navy-950 sm:p-10">
-            {/* Top Corporate Node */}
-            <div className="mx-auto max-w-md rounded-2xl border-2 border-electric-500 bg-navy-950 p-5 text-center text-white shadow-lg">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-electric-400">
-                Parent Corporate Entity
-              </p>
-              <p className="mt-1 text-xl font-extrabold">{companyName}</p>
-              <p className="mt-1 text-xs text-slate-300">
-                Corporate Strategy • Brand Governance • Portfolio Stewardship
-              </p>
-            </div>
-
-            {/* Connector Line */}
-            <div className="mx-auto h-8 w-0.5 bg-electric-500/50" aria-hidden="true" />
-
-            {/* Sector Columns */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
-              {sectorGroups.map((sector) => {
-                const sectorPlatforms = platforms.filter(
-                  (p) => mapCategoryToFilterGroup(p.category) === sector
-                );
-                return (
-                  <div
-                    key={sector}
-                    className="flex flex-col rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-navy-900"
-                  >
-                    <div className="border-b border-slate-200 pb-2.5 dark:border-slate-800">
-                      <span className="text-xs font-extrabold uppercase tracking-wider text-electric-600 dark:text-electric-400">
-                        {sector}
-                      </span>
-                    </div>
-                    <div className="mt-3 flex flex-1 flex-col gap-2.5">
-                      {sectorPlatforms.map((sp) => (
-                        <Link
-                          key={sp.id}
-                          href={`/platforms/${sp.slug}`}
-                          className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm transition-colors hover:border-electric-500 dark:border-slate-800 dark:bg-navy-950"
-                        >
-                          <div className="flex items-center justify-between gap-1">
-                            <span className="text-sm font-bold text-slate-900 dark:text-white">
-                              {sp.name}
-                            </span>
-                          </div>
-                          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                            {sp.category}
-                          </p>
-                          <div className="mt-2">
-                            <StatusBadge status={sp.platform_status} />
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-8 rounded-xl bg-slate-100 px-4 py-3 text-center text-xs text-slate-600 dark:bg-navy-900 dark:text-slate-400">
-              <strong>Operational Independence Notice:</strong> Each platform in
-              the {companyName} ecosystem maintains its own separate website,
-              service infrastructure, and user governance upon launch.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION F — PARTNERSHIP CTA */}
-      <section className="bg-navy-950 py-20 text-white">
-        <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-          <span className="inline-block rounded-full border border-electric-500/30 bg-electric-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-widest text-electric-400">
-            Global Collaboration
-          </span>
-          <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl text-white">
             {content.partnership_headline ||
-              "Let's Build New Opportunities Together."}
+              "Strategic Alliances, Institutional Investment & Global Enterprise Integration"}
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">
+
+          <p className="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
             {content.partnership_text ||
-              "Interested in partnerships, business collaboration, or learning more about our platforms? Connect with Booking Network."}
+              "Connect with Booking Network Global Group's executive leadership, institutional investor relations, or enterprise architecture alliance team to explore cross-border platform integration and joint ventures."}
           </p>
-          <div className="mt-8 flex justify-center">
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href={content.partnership_cta_link || "/contact"}
-              className="inline-flex items-center gap-2 rounded-xl bg-electric-600 px-7 py-4 text-sm font-bold text-white shadow-lg shadow-electric-600/25 hover:bg-electric-500 transition-all"
+              className="inline-flex items-center gap-2 rounded-2xl bg-cobalt-600 px-7 py-4 text-sm font-bold text-white shadow-xl shadow-cobalt-600/30 hover:bg-cobalt-500 transition-all hover:scale-[1.02]"
             >
-              {content.partnership_cta_text || "Contact Our Team"}
+              <span>{content.partnership_cta_text || "Initiate Strategic Inquiry"}</span>
               <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href="/about#network"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-sm font-bold text-white hover:bg-white/10 transition-colors"
+            >
+              <span>Explore Global Regional Hubs</span>
+              <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -514,4 +251,3 @@ export default async function HomePage() {
     </div>
   );
 }
-

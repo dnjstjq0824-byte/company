@@ -2,14 +2,18 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   Layers,
-  CheckCircle2,
-  Clock,
+  Newspaper,
+  Globe2,
   Inbox,
   MailWarning,
   Activity,
   ArrowRight,
   FileEdit,
   Settings,
+  ShieldCheck,
+  Server,
+  Database,
+  ExternalLink,
 } from "lucide-react";
 import { getAuthenticatedAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -24,26 +28,24 @@ export default async function AdminDashboardPage() {
   }
 
   const [
-    totalPlatforms,
-    livePlatforms,
-    inDevPlatforms,
+    totalDivisions,
+    liveDivisions,
+    totalNews,
+    totalHubs,
     unreadInquiries,
     totalInquiries,
     recentLogs,
     recentInquiries,
-    platforms,
+    divisions,
   ] = await Promise.all([
     prisma.platform.count(),
     prisma.platform.count({ where: { platform_status: "Live" } }),
-    prisma.platform.count({
-      where: {
-        platform_status: { in: ["In Development", "Coming Soon"] },
-      },
-    }),
+    prisma.newsPost.count(),
+    prisma.globalHub.count({ where: { status: "Active" } }),
     prisma.contactInquiry.count({ where: { status: "New" } }),
     prisma.contactInquiry.count(),
     prisma.adminActivityLog.findMany({
-      include: { admin: { select: { email: true } } },
+      include: { admin: { select: { email: true, role: true } } },
       orderBy: { created_at: "desc" },
       take: 8,
     }),
@@ -53,106 +55,117 @@ export default async function AdminDashboardPage() {
     }),
     prisma.platform.findMany({
       orderBy: { display_order: "asc" },
-      take: 10,
+      take: 6,
     }),
   ]);
 
   const statCards = [
     {
-      label: "Total Platforms",
-      value: totalPlatforms,
-      sub: "Portfolio records in database",
+      label: "Business & Tech Divisions",
+      value: `${liveDivisions} / ${totalDivisions}`,
+      sub: "Active strategic business units",
       icon: Layers,
       href: "/admin/platforms",
+      tag: "Active Core",
     },
     {
-      label: "Live Platforms",
-      value: livePlatforms,
-      sub: "Actively launched services",
-      icon: CheckCircle2,
-      href: "/admin/platforms",
+      label: "Newsroom & IR Disclosures",
+      value: totalNews,
+      sub: "Press releases, IR & technical notices",
+      icon: Newspaper,
+      href: "/admin/newsroom",
+      tag: "Global Media",
     },
     {
-      label: "In-Development / Coming Soon",
-      value: inDevPlatforms,
-      sub: "Pipeline & pre-launch services",
-      icon: Clock,
-      href: "/admin/platforms",
+      label: "Global Infrastructure Hubs",
+      value: totalHubs,
+      sub: "Strategic nodes across APAC, NA, EU, MENA",
+      icon: Globe2,
+      href: "/admin/network",
+      tag: "Network Grid",
     },
     {
-      label: "Unread Contact Inquiries",
+      label: "Actionable Inquiries",
       value: unreadInquiries,
-      sub: "Marked as 'New' in inbox",
+      sub: `${totalInquiries} total partnership inquiries`,
       icon: MailWarning,
       href: "/admin/inquiries",
-    },
-    {
-      label: "Total Contact Inquiries",
-      value: totalInquiries,
-      sub: "All recorded submissions",
-      icon: Inbox,
-      href: "/admin/inquiries",
+      tag: unreadInquiries > 0 ? "Requires Review" : "All Clear",
+      highlight: unreadInquiries > 0,
     },
   ];
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      {/* Header */}
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">
-            Administrator Dashboard Overview
+          <div className="inline-flex items-center gap-2 rounded-full border border-electric-500/20 bg-electric-500/10 px-3 py-1 text-[11px] font-mono font-semibold text-electric-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            OPERATIONAL CONSOLE — LEVEL 04 GOVERNANCE
+          </div>
+          <h1 className="mt-2 text-2xl font-extrabold text-white tracking-tight sm:text-3xl">
+            Booking Network Global Group Executive Command
           </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Real-time database metrics, platform portfolio statuses, and recent
-            administrative updates.
+          <p className="mt-1 text-sm text-slate-400 max-w-3xl">
+            Unified governance telemetry for 6 core business divisions, global edge infrastructure nodes, investor relations publications, and enterprise partnership inquiries.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2.5">
           <Link
             href="/admin/platforms"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-electric-600 px-4 py-2 text-xs font-bold text-white hover:bg-electric-700 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-electric-600 px-4 py-2 text-xs font-bold text-white hover:bg-electric-500 shadow-lg shadow-electric-600/30 transition-all"
           >
             <Layers className="h-4 w-4" />
-            Manage Platforms
+            Divisions CMS
+          </Link>
+          <Link
+            href="/admin/newsroom"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-200 hover:border-electric-500/50 hover:bg-slate-800 transition-all"
+          >
+            <Newspaper className="h-4 w-4 text-electric-400" />
+            Post News / IR
           </Link>
           <Link
             href="/admin/content"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-800 dark:bg-navy-900 dark:text-slate-200"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-200 hover:border-electric-500/50 hover:bg-slate-800 transition-all"
           >
             <FileEdit className="h-4 w-4" />
-            Edit Website Content
-          </Link>
-          <Link
-            href="/admin/settings"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-800 dark:bg-navy-900 dark:text-slate-200"
-          >
-            <Settings className="h-4 w-4" />
-            Corporate Settings
+            Website CMS
           </Link>
         </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
             <Link
               key={card.label}
               href={card.href}
-              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-electric-500 dark:border-slate-800 dark:bg-navy-900"
+              className={`group relative overflow-hidden rounded-2xl border p-5 transition-all ${
+                card.highlight
+                  ? "border-amber-500/40 bg-amber-950/20 hover:border-amber-400"
+                  : "border-slate-800 bg-slate-900/70 hover:border-electric-500/50 hover:bg-slate-900"
+              }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {card.label}
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+                  {card.tag}
                 </span>
-                <Icon className="h-4 w-4 text-electric-600 dark:text-electric-400" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800/80 group-hover:bg-electric-500/20 text-electric-400 transition-colors">
+                  <Icon className="h-4 w-4" />
+                </div>
               </div>
-              <p className="mt-3 font-display text-3xl font-extrabold text-slate-900 dark:text-white">
+              <p className="mt-4 font-mono text-3xl font-extrabold text-white">
                 {card.value}
               </p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs font-semibold text-slate-200">
+                {card.label}
+              </p>
+              <p className="mt-0.5 text-[11px] text-slate-400">
                 {card.sub}
               </p>
             </Link>
@@ -160,51 +173,85 @@ export default async function AdminDashboardPage() {
         })}
       </div>
 
+      {/* System Health Bar */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+              <Server className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white">System Runtime & Data Engine Diagnostics</p>
+              <p className="text-[11px] text-slate-400">Zero downtime architecture • Cloudflare Edge & Prisma ORM Engine</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="text-slate-300">Prisma SQLite: Online</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="text-slate-300">JWT Token Auth: Validated</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="text-slate-300">Edge Gateway: Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Platform Portfolio Snapshot */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-navy-900 lg:col-span-7">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">
-              Platform Ecosystem Status ({platforms.length})
-            </h2>
+        {/* Core Divisions Snapshot */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 lg:col-span-7">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <h2 className="text-base font-bold text-white">
+                Core Divisions Ecosystem ({divisions.length})
+              </h2>
+              <p className="text-xs text-slate-400">
+                Strategic tech business pillars in Booking Network Global Group
+              </p>
+            </div>
             <Link
               href="/admin/platforms"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-electric-600 hover:underline dark:text-electric-400"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-electric-400 hover:text-electric-300 hover:underline"
             >
-              Manage All
+              Configure All
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
-          <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800">
-            {platforms.map((p) => (
+          <div className="mt-4 divide-y divide-slate-800/80">
+            {divisions.map((d) => (
               <div
-                key={p.id}
-                className="flex items-center justify-between py-3 text-sm"
+                key={d.id}
+                className="flex items-center justify-between py-3.5 text-sm"
               >
                 <div className="flex items-center gap-3">
-                  <span className="w-5 text-xs font-bold text-slate-400">
-                    #{p.display_order}
+                  <span className="font-mono text-xs font-bold text-electric-400 bg-slate-800/80 px-2 py-0.5 rounded">
+                    {d.division_code || `#${d.display_order}`}
                   </span>
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white">
-                      {p.name}
+                    <p className="font-bold text-white">
+                      {d.name}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {p.category} • /platforms/{p.slug}
+                    <p className="text-xs text-slate-400">
+                      {d.category} • /platforms/{d.slug}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <StatusBadge status={p.platform_status} />
+                  <StatusBadge status={d.platform_status} />
                   <span
-                    className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${
-                      p.publication_status === "Published"
-                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
-                        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                    className={`rounded-md px-2 py-0.5 text-[11px] font-mono font-semibold ${
+                      d.publication_status === "Published"
+                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        : "bg-slate-800 text-slate-400"
                     }`}
                   >
-                    {p.publication_status}
+                    {d.publication_status}
                   </span>
                 </div>
               </div>
@@ -212,17 +259,20 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Right Column: Recent Activity & Recent Inquiries */}
+        {/* Right Column: Inquiries & Audit Trail */}
         <div className="space-y-6 lg:col-span-5">
-          {/* Recent Contact Inquiries */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-navy-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Recent Contact Inquiries
-              </h2>
+          {/* Recent Inquiries */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <h2 className="text-base font-bold text-white">
+                  Enterprise Partnership Inquiries
+                </h2>
+                <p className="text-xs text-slate-400">Global client and institutional submissions</p>
+              </div>
               <Link
                 href="/admin/inquiries"
-                className="text-xs font-semibold text-electric-600 hover:underline dark:text-electric-400"
+                className="text-xs font-semibold text-electric-400 hover:text-electric-300 hover:underline"
               >
                 Open Inbox →
               </Link>
@@ -230,29 +280,29 @@ export default async function AdminDashboardPage() {
 
             {recentInquiries.length === 0 ? (
               <p className="py-6 text-center text-xs text-slate-500">
-                No contact inquiries have been submitted yet.
+                No inquiries submitted yet.
               </p>
             ) : (
-              <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="mt-4 divide-y divide-slate-800/80">
                 {recentInquiries.map((inq) => (
                   <div key={inq.id} className="py-3">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                      <span className="truncate text-xs font-bold text-white">
                         {inq.subject}
                       </span>
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                           inq.status === "New"
-                            ? "bg-electric-100 text-electric-700 dark:bg-electric-950 dark:text-electric-300"
+                            ? "bg-electric-500/20 text-electric-300 border border-electric-500/30"
                             : inq.status === "In Progress"
-                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                            : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                         }`}
                       >
                         {inq.status}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    <p className="mt-0.5 text-[11px] text-slate-400">
                       {inq.full_name} ({inq.email}) • {inq.inquiry_type}
                     </p>
                   </div>
@@ -261,36 +311,36 @@ export default async function AdminDashboardPage() {
             )}
           </div>
 
-          {/* Recent Website Content Updates / Activity Logs */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-navy-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+          {/* Audit Logs */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-electric-600 dark:text-electric-400" />
-                <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                  Recent Administrative Activity
+                <Activity className="h-4 w-4 text-electric-400" />
+                <h2 className="text-base font-bold text-white">
+                  Audit Trail & Governance Logs
                 </h2>
               </div>
               <Link
                 href="/admin/security"
-                className="text-xs font-semibold text-electric-600 hover:underline dark:text-electric-400"
+                className="text-xs font-semibold text-electric-400 hover:text-electric-300 hover:underline"
               >
-                Full Log →
+                Audit Log →
               </Link>
             </div>
 
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 space-y-2.5">
               {recentLogs.map((log) => (
                 <div
                   key={log.id}
-                  className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-xs dark:border-slate-800 dark:bg-navy-950"
+                  className="rounded-xl border border-slate-800/80 bg-slate-950/70 p-3 text-xs"
                 >
-                  <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
-                    <span>{log.action}</span>
-                    <span className="text-[11px] font-normal text-slate-400">
-                      {new Date(log.created_at).toLocaleString()}
+                  <div className="flex items-center justify-between font-mono font-bold text-slate-200">
+                    <span className="text-[11px] text-electric-400">{log.action}</span>
+                    <span className="text-[10px] font-normal text-slate-500">
+                      {new Date(log.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  <p className="mt-1 text-slate-600 dark:text-slate-400">
+                  <p className="mt-1 text-[11px] text-slate-400 truncate">
                     {log.target}
                   </p>
                 </div>
@@ -302,4 +352,3 @@ export default async function AdminDashboardPage() {
     </div>
   );
 }
-

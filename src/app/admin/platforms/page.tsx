@@ -12,6 +12,13 @@ import {
   X,
   Eye,
   Loader2,
+  Layers,
+  Server,
+  Cpu,
+  Network,
+  ShieldCheck,
+  Sparkles,
+  Leaf,
 } from "lucide-react";
 import { ParsedPlatform } from "@/lib/data";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -25,15 +32,34 @@ const PLATFORM_STATUSES = [
 
 const PUBLICATION_STATUSES = ["Published", "Draft", "Archived"];
 
+const CATEGORIES = [
+  "Core Infrastructure",
+  "AI & Big Data",
+  "B2B Platform & API",
+  "FinTech & Cybersecurity",
+  "Platform Incubation",
+  "ESG & Governance",
+];
+
+const ICONS = ["Server", "Cpu", "Network", "ShieldCheck", "Sparkles", "Leaf", "Layers"];
+
+interface MetricItem {
+  label: string;
+  value: string;
+}
+
 interface PlatformFormState {
   id?: string;
   name: string;
   slug: string;
+  division_code: string;
   category: string;
+  icon_name: string;
   short_description: string;
   full_description: string;
   logo: string;
   featuresText: string;
+  key_metrics: MetricItem[];
   target_audience: string;
   business_purpose: string;
   website_url: string;
@@ -47,17 +73,23 @@ interface PlatformFormState {
 const EMPTY_FORM: PlatformFormState = {
   name: "",
   slug: "",
-  category: "Global E-Commerce",
+  division_code: "BNG-CORE-01",
+  category: "Core Infrastructure",
+  icon_name: "Server",
   short_description: "",
   full_description: "",
   logo: "/logos/booking-network.svg",
   featuresText: "",
-  target_audience: "",
-  business_purpose: "",
+  key_metrics: [
+    { label: "Uptime SLA", value: "99.999%" },
+    { label: "Global Reach", value: "140+ Nodes" },
+  ],
+  target_audience: "Enterprise & Global Partners",
+  business_purpose: "Core platform backbone for Booking Network Global Group",
   website_url: "",
-  platform_status: "In Development",
+  platform_status: "Live",
   publication_status: "Published",
-  display_order: 11,
+  display_order: 1,
   seo_title: "",
   seo_description: "",
 };
@@ -85,7 +117,7 @@ export default function AdminPlatformsPage() {
         setPlatforms(data.platforms);
       }
     } catch {
-      setFeedback({ type: "error", text: "Failed to load platforms." });
+      setFeedback({ type: "error", text: "Failed to load platform divisions." });
     } finally {
       setLoading(false);
     }
@@ -102,6 +134,7 @@ export default function AdminPlatformsPage() {
     });
     setPreviewMode(false);
     setModalOpen(true);
+    setFeedback(null);
   };
 
   const openEditModal = (p: ParsedPlatform) => {
@@ -109,13 +142,18 @@ export default function AdminPlatformsPage() {
       id: p.id,
       name: p.name,
       slug: p.slug,
+      division_code: p.division_code || "",
       category: p.category,
+      icon_name: p.icon_name || "Layers",
       short_description: p.short_description,
       full_description: p.full_description,
       logo: p.logo || "/logos/booking-network.svg",
-      featuresText: p.features.join("\n"),
-      target_audience: p.target_audience || "",
-      business_purpose: p.business_purpose || "",
+      featuresText: Array.isArray(p.features) ? p.features.join("\n") : "",
+      key_metrics: Array.isArray(p.key_metrics) && p.key_metrics.length > 0
+        ? p.key_metrics
+        : [{ label: "Target SLA", value: "99.99%" }],
+      target_audience: p.target_audience,
+      business_purpose: p.business_purpose,
       website_url: p.website_url || "",
       platform_status: p.platform_status,
       publication_status: p.publication_status,
@@ -125,68 +163,92 @@ export default function AdminPlatformsPage() {
     });
     setPreviewMode(false);
     setModalOpen(true);
+    setFeedback(null);
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMetricChange = (index: number, field: "label" | "value", val: string) => {
+    setForm((prev) => {
+      const next = [...prev.key_metrics];
+      next[index] = { ...next[index], [field]: val };
+      return { ...prev, key_metrics: next };
+    });
+  };
+
+  const addMetric = () => {
+    setForm((prev) => ({
+      ...prev,
+      key_metrics: [...prev.key_metrics, { label: "", value: "" }],
+    }));
+  };
+
+  const removeMetric = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      key_metrics: prev.key_metrics.filter((_, idx) => idx !== index),
+    }));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
-    setFeedback(null);
-
     try {
-      const fd = new FormData();
-      fd.append("file", file);
+      const formData = new FormData();
+      formData.append("file", file);
 
       const res = await fetch("/api/admin/upload", {
         method: "POST",
-        body: fd,
+        body: formData,
       });
       const data = await res.json();
 
-      if (!res.ok) {
-        setFeedback({
-          type: "error",
-          text: data.error || "Logo upload failed.",
-        });
-      } else {
+      if (res.ok && data.url) {
         setForm((prev) => ({ ...prev, logo: data.url }));
         setFeedback({
           type: "success",
-          text: "Logo uploaded and verified.",
+          text: "Asset logo successfully uploaded.",
+        });
+      } else {
+        setFeedback({
+          type: "error",
+          text: data.error || "Failed to upload asset.",
         });
       }
     } catch {
-      setFeedback({ type: "error", text: "Error uploading file." });
+      setFeedback({ type: "error", text: "Error during file upload." });
     } finally {
       setUploading(false);
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setFeedback(null);
 
     const payload = {
-      name: form.name,
-      slug: form.slug,
-      category: form.category,
-      short_description: form.short_description,
-      full_description: form.full_description,
-      logo: form.logo,
+      name: form.name.trim(),
+      slug: form.slug.trim(),
+      division_code: form.division_code.trim(),
+      category: form.category.trim(),
+      icon_name: form.icon_name.trim(),
+      short_description: form.short_description.trim(),
+      full_description: form.full_description.trim() || form.short_description.trim(),
+      logo: form.logo.trim() || "/logos/booking-network.svg",
       features: form.featuresText
         .split("\n")
-        .map((s) => s.trim())
+        .map((f) => f.trim())
         .filter(Boolean),
-      target_audience: form.target_audience,
-      business_purpose: form.business_purpose,
-      website_url: form.website_url,
+      key_metrics: form.key_metrics.filter((m) => m.label && m.value),
+      target_audience: form.target_audience.trim(),
+      business_purpose: form.business_purpose.trim(),
+      website_url: form.website_url.trim() || null,
       platform_status: form.platform_status,
       publication_status: form.publication_status,
-      display_order: Number(form.display_order),
-      seo_title: form.seo_title,
-      seo_description: form.seo_description,
+      display_order: Number(form.display_order) || 99,
+      seo_title: form.seo_title.trim() || undefined,
+      seo_description: form.seo_description.trim() || undefined,
     };
 
     try {
@@ -202,26 +264,19 @@ export default function AdminPlatformsPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        setFeedback({
-          type: "error",
-          text: data.error || "Failed to save platform.",
-        });
-        setSaving(false);
-        return;
-      }
 
-      setFeedback({
-        type: "success",
-        text: `Platform '${data.platform.name}' saved and published changes synced.`,
-      });
-      setModalOpen(false);
-      await fetchPlatforms();
+      if (!res.ok) {
+        setFeedback({ type: "error", text: data.error || "Failed to save division." });
+      } else {
+        setModalOpen(false);
+        setFeedback({
+          type: "success",
+          text: `Division '${payload.name}' saved successfully.`,
+        });
+        await fetchPlatforms();
+      }
     } catch {
-      setFeedback({
-        type: "error",
-        text: "Network error while saving platform.",
-      });
+      setFeedback({ type: "error", text: "Network error while saving." });
     } finally {
       setSaving(false);
     }
@@ -233,193 +288,187 @@ export default function AdminPlatformsPage() {
         method: "DELETE",
       });
       if (res.ok) {
+        setDeleteConfirmId(null);
         setFeedback({
           type: "success",
-          text: "Platform entry deleted.",
+          text: "Division record deleted successfully.",
         });
-        setDeleteConfirmId(null);
         await fetchPlatforms();
       } else {
         const data = await res.json();
         setFeedback({
           type: "error",
-          text: data.error || "Failed to delete platform.",
+          text: data.error || "Failed to delete division.",
         });
       }
     } catch {
-      setFeedback({ type: "error", text: "Error deleting platform." });
+      setFeedback({ type: "error", text: "Error deleting division record." });
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-slate-900 dark:text-white">
-            Platform Portfolio Management
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">
+            Business & Technology Divisions CMS
           </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Add, edit, reorder, configure statuses, or update official URLs for
-            all platforms in the Booking Network ecosystem.
+          <p className="mt-1 text-sm text-slate-400">
+            Configure the 6 core business pillars, infrastructure codes, capabilities, key metrics, and service availability for Booking Network Global Group.
           </p>
         </div>
-
         <button
           type="button"
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 rounded-xl bg-electric-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-electric-700 transition-colors"
+          className="inline-flex items-center gap-2 rounded-xl bg-electric-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-electric-500 shadow-md shadow-electric-600/30 transition-all"
         >
           <Plus className="h-4 w-4" />
-          Add New Platform
+          Add Division
         </button>
       </div>
 
+      {/* Global Feedback Banner */}
       {feedback && (
         <div
-          className={`flex items-center justify-between rounded-xl border p-4 text-sm ${
+          className={`flex items-center justify-between rounded-xl px-4 py-3 text-xs font-semibold ${
             feedback.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
-              : "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950/50 dark:text-red-200"
+              ? "border border-emerald-500/30 bg-emerald-950/40 text-emerald-300"
+              : "border border-red-500/30 bg-red-950/40 text-red-300"
           }`}
         >
           <span>{feedback.text}</span>
           <button
             type="button"
             onClick={() => setFeedback(null)}
-            className="text-xs font-bold underline"
+            className="text-slate-400 hover:text-white"
           >
-            Dismiss
+            <X className="h-3.5 w-3.5" />
           </button>
         </div>
       )}
 
-      {/* Platforms Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-navy-900">
+      {/* Platforms Table / Grid */}
+      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 shadow-sm">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-sm text-slate-500">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Loading platform portfolio...
+          <div className="flex h-64 items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-electric-400" />
+          </div>
+        ) : platforms.length === 0 ? (
+          <div className="py-16 text-center">
+            <Layers className="mx-auto h-10 w-10 text-slate-600" />
+            <p className="mt-3 text-sm font-bold text-white">No divisions registered</p>
+            <p className="mt-1 text-xs text-slate-400">
+              Create a division to showcase on the global platform portal.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-navy-950 dark:text-slate-400">
+            <table className="w-full text-left text-xs">
+              <thead className="border-b border-slate-800 bg-slate-950/60 font-mono text-[11px] uppercase tracking-wider text-slate-400">
                 <tr>
-                  <th className="px-4 py-3.5">Order</th>
-                  <th className="px-4 py-3.5">Platform</th>
-                  <th className="px-4 py-3.5">Category</th>
-                  <th className="px-4 py-3.5">Status</th>
-                  <th className="px-4 py-3.5">Publication</th>
-                  <th className="px-4 py-3.5">Official URL</th>
-                  <th className="px-4 py-3.5 text-right">Actions</th>
+                  <th className="px-5 py-3.5">Code / Order</th>
+                  <th className="px-5 py-3.5">Division & Category</th>
+                  <th className="px-5 py-3.5">Key Metrics</th>
+                  <th className="px-5 py-3.5">Operational Status</th>
+                  <th className="px-5 py-3.5">Publish</th>
+                  <th className="px-5 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-800/80">
                 {platforms.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="hover:bg-slate-50/70 dark:hover:bg-navy-800/40"
-                  >
-                    <td className="px-4 py-3.5 font-mono text-xs text-slate-500">
-                      #{p.display_order}
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-navy-950 p-1 dark:border-slate-700">
-                          {p.logo && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={p.logo}
-                              alt=""
-                              className="h-full w-full object-contain"
-                            />
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900 dark:text-white">
-                            {p.name}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            /platforms/{p.slug}
-                          </p>
-                        </div>
+                  <tr key={p.id} className="hover:bg-slate-800/30 transition-colors">
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-electric-400 bg-slate-800 px-2 py-0.5 rounded">
+                          {p.division_code || `DIV-0${p.display_order}`}
+                        </span>
+                        <span className="text-[11px] text-slate-500">#{p.display_order}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {p.category}
+                    <td className="px-5 py-4">
+                      <div>
+                        <p className="font-bold text-white text-sm">{p.name}</p>
+                        <p className="text-[11px] text-slate-400 font-mono">
+                          {p.category} • /platforms/{p.slug}
+                        </p>
+                      </div>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-5 py-4">
+                      <div className="flex flex-wrap gap-1.5 max-w-xs">
+                        {p.key_metrics && p.key_metrics.length > 0 ? (
+                          p.key_metrics.slice(0, 2).map((m, idx) => (
+                            <span
+                              key={idx}
+                              className="rounded border border-slate-700 bg-slate-800/80 px-1.5 py-0.5 text-[10px] font-mono text-slate-300"
+                            >
+                              <strong className="text-white">{m.value}</strong> {m.label}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-slate-500 text-[10px]">—</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
                       <StatusBadge status={p.platform_status} />
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-5 py-4 whitespace-nowrap">
                       <span
-                        className={`rounded-md px-2.5 py-0.5 text-xs font-semibold ${
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-mono font-bold ${
                           p.publication_status === "Published"
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
-                            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : p.publication_status === "Draft"
+                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                            : "bg-slate-800 text-slate-400"
                         }`}
                       >
                         {p.publication_status}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-xs">
-                      {p.website_url ? (
-                        <a
-                          href={p.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 font-medium text-electric-600 hover:underline dark:text-electric-400"
-                        >
-                          {p.website_url}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      ) : (
-                        <span className="text-slate-400">Not configured</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3.5 text-right">
+                    <td className="px-5 py-4 text-right whitespace-nowrap">
                       <div className="inline-flex items-center gap-2">
                         <Link
                           href={`/platforms/${p.slug}`}
                           target="_blank"
-                          title="View Public Detail Page"
-                          className="rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-navy-800"
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                          title="View Live Page"
                         >
-                          <ExternalLink className="h-4 w-4" />
+                          <ExternalLink className="h-3.5 w-3.5" />
                         </Link>
                         <button
                           type="button"
                           onClick={() => openEditModal(p)}
-                          title="Edit Platform"
-                          className="rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:border-electric-500 hover:text-electric-600 dark:border-slate-700 dark:text-slate-300"
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-electric-400 transition-colors"
+                          title="Edit Division"
                         >
-                          <Edit3 className="h-4 w-4" />
+                          <Edit3 className="h-3.5 w-3.5" />
                         </button>
                         {deleteConfirmId === p.id ? (
-                          <div className="inline-flex items-center gap-1 rounded-lg bg-red-50 px-2 py-1 dark:bg-red-950">
+                          <div className="flex items-center gap-1">
                             <button
                               type="button"
                               onClick={() => handleDelete(p.id)}
-                              className="text-xs font-bold text-red-600 hover:underline dark:text-red-400"
+                              className="rounded-lg bg-red-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-red-500"
                             >
                               Confirm
                             </button>
                             <button
                               type="button"
                               onClick={() => setDeleteConfirmId(null)}
-                              className="text-xs text-slate-500"
+                              className="rounded-lg bg-slate-800 px-1.5 py-1 text-[10px] text-slate-400 hover:text-white"
                             >
-                              <X className="h-3.5 w-3.5" />
+                              Cancel
                             </button>
                           </div>
                         ) : (
                           <button
                             type="button"
                             onClick={() => setDeleteConfirmId(p.id)}
-                            title="Delete Platform"
-                            className="rounded-lg border border-slate-200 p-1.5 text-red-600 hover:bg-red-50 dark:border-slate-700 dark:text-red-400"
+                            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-red-400 transition-colors"
+                            title="Delete Division"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         )}
                       </div>
@@ -432,381 +481,311 @@ export default function AdminPlatformsPage() {
         )}
       </div>
 
-      {/* Add/Edit Platform Modal with Live Preview */}
+      {/* Create / Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/80 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-navy-900 sm:p-8">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="relative w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden my-8">
+            <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
               <div>
-                <h2 className="font-display text-xl font-extrabold text-slate-900 dark:text-white">
-                  {form.id ? `Edit Platform: ${form.name}` : "Add New Platform"}
-                </h2>
-                <p className="text-xs text-slate-500">
-                  All changes update the public portfolio directory and dynamic
-                  detail page.
+                <h3 className="text-base font-bold text-white">
+                  {form.id ? `Edit Division: ${form.name}` : "Create Business & Tech Division"}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {form.id ? "Update strategic division profile & operational parameters" : "Provision a new strategic technology division"}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setPreviewMode((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200"
+                  onClick={() => setPreviewMode(!previewMode)}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border transition-colors ${
+                    previewMode
+                      ? "border-electric-500 bg-electric-500/20 text-electric-300"
+                      : "border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  }`}
                 >
                   <Eye className="h-3.5 w-3.5" />
-                  {previewMode ? "Back to Editor" : "Preview Card"}
+                  {previewMode ? "Form View" : "Preview"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
 
             {previewMode ? (
-              <div className="py-8">
-                <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Live Portfolio Card & Detail Preview
-                </p>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-navy-950">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-navy-900 p-2 border border-slate-800">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={form.logo || "/logos/booking-network.svg"}
-                        alt=""
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold uppercase text-electric-600">
-                          {form.category}
-                        </span>
-                        <StatusBadge status={form.platform_status} />
-                      </div>
-                      <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                        {form.name || "Untitled Platform"}
-                      </h3>
-                    </div>
+              <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                <div className="rounded-xl border border-slate-800 bg-slate-950 p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-electric-400 bg-electric-500/10 border border-electric-500/30 px-2.5 py-1 rounded-md">
+                      {form.division_code || "BNG-DIV-01"}
+                    </span>
+                    <StatusBadge status={form.platform_status} />
                   </div>
-                  <p className="mt-4 text-sm font-medium text-slate-700 dark:text-slate-200">
-                    {form.short_description}
-                  </p>
-                  <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                    {form.full_description}
-                  </p>
+                  <h4 className="mt-3 text-xl font-bold text-white">{form.name || "Division Title"}</h4>
+                  <p className="mt-1 text-xs text-slate-400">{form.category} • /platforms/{form.slug || "slug"}</p>
+                  <p className="mt-4 text-sm text-slate-300">{form.short_description || "Short description preview..."}</p>
+
+                  <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {form.key_metrics.map((m, idx) => (
+                      <div key={idx} className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+                        <p className="font-mono text-lg font-black text-white">{m.value || "—"}</p>
+                        <p className="text-[11px] text-slate-400">{m.label || "Metric"}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSave} className="mt-6 space-y-5">
+              <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[75vh] overflow-y-auto text-xs">
+                {/* Basic info row */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      Platform Name *
-                    </label>
+                    <label className="block font-bold text-slate-200">Division Name *</label>
                     <input
                       type="text"
                       required
                       value={form.name}
                       onChange={(e) => {
-                        const val = e.target.value;
+                        const name = e.target.value;
+                        const slug = name.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "");
                         setForm((prev) => ({
                           ...prev,
-                          name: val,
-                          slug: prev.id
-                            ? prev.slug
-                            : val
-                                .toLowerCase()
-                                .replace(/[^a-z0-9]+/g, "-")
-                                .replace(/^-|-$/g, ""),
+                          name,
+                          slug: prev.id ? prev.slug : slug,
                         }));
                       }}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                      placeholder="e.g. Global Cloud & Distributed Infrastructure"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      URL Slug *
-                    </label>
+                    <label className="block font-bold text-slate-200">Division Code *</label>
+                    <input
+                      type="text"
+                      required
+                      value={form.division_code}
+                      onChange={(e) => setForm({ ...form, division_code: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-electric-400 focus:border-electric-500 focus:outline-none"
+                      placeholder="e.g. BNG-INFRA-01"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-200">URL Slug *</label>
                     <input
                       type="text"
                       required
                       value={form.slug}
-                      onChange={(e) =>
-                        setForm((prev) => ({ ...prev, slug: e.target.value }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      Business Category *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={form.category}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          category: e.target.value,
-                        }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                      onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-slate-300 focus:border-electric-500 focus:outline-none"
+                      placeholder="e.g. cloud-infrastructure"
                     />
                   </div>
                 </div>
 
+                {/* Category & Icon row */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      Platform Status
-                    </label>
+                    <label className="block font-bold text-slate-200">Category Area</label>
+                    <select
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                    >
+                      {CATEGORIES.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-200">Icon Emblem</label>
+                    <select
+                      value={form.icon_name}
+                      onChange={(e) => setForm({ ...form, icon_name: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                    >
+                      {ICONS.map((icon) => (
+                        <option key={icon} value={icon}>{icon}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-200">Platform Status</label>
                     <select
                       value={form.platform_status}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          platform_status: e.target.value,
-                        }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                      onChange={(e) => setForm({ ...form, platform_status: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
                     >
                       {PLATFORM_STATUSES.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
+                        <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
                   </div>
-
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      Publication Status
-                    </label>
+                    <label className="block font-bold text-slate-200">Publication Status</label>
                     <select
                       value={form.publication_status}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          publication_status: e.target.value,
-                        }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                      onChange={(e) => setForm({ ...form, publication_status: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
                     >
                       {PUBLICATION_STATUSES.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
+                        <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      Display Order
-                    </label>
-                    <input
-                      type="number"
-                      value={form.display_order}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          display_order: Number(e.target.value),
-                        }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      Official Website URL
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://..."
-                      value={form.website_url}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          website_url: e.target.value,
-                        }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
-                    />
-                  </div>
                 </div>
 
-                {/* Logo Upload */}
+                {/* Descriptions */}
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                    Platform Logo Path or Upload
-                  </label>
-                  <div className="mt-1.5 flex items-center gap-3">
-                    <input
-                      type="text"
-                      value={form.logo}
-                      onChange={(e) =>
-                        setForm((prev) => ({ ...prev, logo: e.target.value }))
-                      }
-                      className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
-                    />
-                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold hover:bg-slate-100 dark:border-slate-700 dark:bg-navy-800">
-                      <Upload className="h-3.5 w-3.5" />
-                      {uploading ? "Uploading..." : "Upload Logo"}
-                      <input
-                        type="file"
-                        accept=".svg,.png,.jpg,.jpeg,.webp"
-                        onChange={handleLogoUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                    Short Description (Card Summary) *
-                  </label>
+                  <label className="block font-bold text-slate-200">Short Executive Summary *</label>
                   <textarea
-                    rows={2}
                     required
+                    rows={2}
                     value={form.short_description}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        short_description: e.target.value,
-                      }))
-                    }
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                    onChange={(e) => setForm({ ...form, short_description: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                    placeholder="Brief 1-2 sentence high-level description for cards and overview grids."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                    Full Overview Description
-                  </label>
+                  <label className="block font-bold text-slate-200">Full Architectural Description</label>
                   <textarea
                     rows={4}
                     value={form.full_description}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        full_description: e.target.value,
-                      }))
-                    }
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                    onChange={(e) => setForm({ ...form, full_description: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                    placeholder="In-depth details, technology stack, and business model displayed on the division's detail page."
                   />
                 </div>
 
+                {/* Key Metrics Dynamic Array */}
+                <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-white text-xs">High-Impact Key Metrics</span>
+                      <p className="text-[10px] text-slate-400">Numerical KPIs displayed on cards and overview hero (e.g., 99.999% SLA, 140+ PoPs)</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addMetric}
+                      className="inline-flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] font-semibold text-slate-200 hover:bg-slate-700"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add Metric
+                    </button>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    {form.key_metrics.map((m, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={m.value}
+                          onChange={(e) => handleMetricChange(idx, "value", e.target.value)}
+                          placeholder="Value (e.g. 99.999% or 140+)"
+                          className="w-1/3 rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 font-mono text-white focus:border-electric-500 focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={m.label}
+                          onChange={(e) => handleMetricChange(idx, "label", e.target.value)}
+                          placeholder="Label (e.g. Uptime SLA or Global PoPs)"
+                          className="flex-1 rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-white focus:border-electric-500 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeMetric(idx)}
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-red-400"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Features (line by line) */}
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                    Key Features (One per line)
+                  <label className="block font-bold text-slate-200">
+                    Core Capabilities / Architecture Highlights (one per line)
                   </label>
                   <textarea
                     rows={4}
                     value={form.featuresText}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        featuresText: e.target.value,
-                      }))
-                    }
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                    onChange={(e) => setForm({ ...form, featuresText: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white font-mono text-xs focus:border-electric-500 focus:outline-none"
+                    placeholder="Global Edge Multi-Cloud Fabric&#10;Sub-15ms Latency Routing&#10;Zero-Trust Perimeter Security"
                   />
                 </div>
 
+                {/* Target Audience & Purpose */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      Target Audience
-                    </label>
-                    <textarea
-                      rows={2}
+                    <label className="block font-bold text-slate-200">Target Audience</label>
+                    <input
+                      type="text"
                       value={form.target_audience}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          target_audience: e.target.value,
-                        }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                      onChange={(e) => setForm({ ...form, target_audience: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                      placeholder="e.g. Enterprise Partners, Financial Institutions"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      Business Purpose
-                    </label>
-                    <textarea
-                      rows={2}
+                    <label className="block font-bold text-slate-200">Business Purpose</label>
+                    <input
+                      type="text"
                       value={form.business_purpose}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          business_purpose: e.target.value,
-                        }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                      onChange={(e) => setForm({ ...form, business_purpose: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                      placeholder="e.g. Backbone computing and networking layer"
                     />
                   </div>
                 </div>
 
+                {/* Order & URL */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      SEO Title
-                    </label>
+                    <label className="block font-bold text-slate-200">Display Order</label>
                     <input
-                      type="text"
-                      value={form.seo_title}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          seo_title: e.target.value,
-                        }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                      type="number"
+                      value={form.display_order}
+                      onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">
-                      SEO Description
-                    </label>
+                    <label className="block font-bold text-slate-200">External Platform URL (optional)</label>
                     <input
-                      type="text"
-                      value={form.seo_description}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          seo_description: e.target.value,
-                        }))
-                      }
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm dark:border-slate-700 dark:bg-navy-950"
+                      type="url"
+                      value={form.website_url}
+                      onChange={(e) => setForm({ ...form, website_url: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                      placeholder="https://..."
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+                {/* Footer Buttons */}
+                <div className="flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
                   <button
                     type="button"
                     onClick={() => setModalOpen(false)}
-                    className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-300"
+                    className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-electric-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-electric-700 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-xl bg-electric-600 px-5 py-2 text-xs font-bold text-white hover:bg-electric-500 shadow-lg shadow-electric-600/30 disabled:opacity-50"
                   >
-                    <Check className="h-4 w-4" />
-                    {saving ? "Saving..." : "Save Platform"}
+                    {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    {form.id ? "Update Division" : "Create Division"}
                   </button>
                 </div>
               </form>
@@ -817,4 +796,3 @@ export default function AdminPlatformsPage() {
     </div>
   );
 }
-

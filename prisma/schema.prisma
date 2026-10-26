@@ -11,16 +11,19 @@ model Platform {
   id                 String   @id @default(cuid())
   name               String
   slug               String   @unique
+  division_code      String   @default("")
   category           String
+  icon_name          String   @default("Layers")
   short_description  String
   full_description   String
   logo               String?
   features           String   // JSON array of strings or feature objects
+  key_metrics        String   @default("[]") // JSON array of key metrics/specs
   target_audience    String
   business_purpose   String   @default("")
   website_url        String?
-  platform_status    String   @default("In Development") // Live | Coming Soon | In Development | Temporarily Unavailable
-  publication_status String   @default("Published")      // Published | Draft | Archived
+  platform_status    String   @default("Core Architecture") // Core Architecture | Live | R&D Phase | Expanding | In Development
+  publication_status String   @default("Published")         // Published | Draft | Archived
   display_order      Int      @default(0)
   seo_title          String?
   seo_description    String?
@@ -30,19 +33,60 @@ model Platform {
   @@map("platforms")
 }
 
+model NewsPost {
+  id                 String   @id @default(cuid())
+  title              String
+  slug               String   @unique
+  category           String   @default("Press Release") // Press Release | IR & Governance | Technology | Global Notice
+  summary            String
+  content            String   // Markdown body
+  thumbnail_url      String?
+  is_featured        Boolean  @default(false)
+  publication_status String   @default("Published")     // Published | Draft | Archived
+  published_at       DateTime @default(now())
+  author_name        String   @default("Booking Network Global Group PR")
+  seo_title          String?
+  seo_description    String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@map("news_posts")
+}
+
+model GlobalHub {
+  id            String   @id @default(cuid())
+  region        String   // APAC | North America | Europe | MENA | Global
+  city          String
+  country       String
+  hub_type      String   // Global HQ | Regional Hub | R&D Center | Cloud Node
+  description   String
+  address       String?
+  contact_email String?
+  status        String   @default("Active")
+  display_order Int      @default(0)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@map("global_hubs")
+}
+
 model ContactInquiry {
-  id                     String   @id @default(cuid())
+  id                     String    @id @default(cuid())
   full_name              String
   email                  String
   company                String?
+  department             String    @default("Global Partnership")
   inquiry_type           String
+  priority               String    @default("Normal") // Low | Normal | High | Urgent
+  assigned_to            String?
   subject                String
   message                String
-  status                 String   @default("New") // New | In Progress | Resolved
+  status                 String    @default("New") // New | In Progress | Resolved | Archived
   admin_notes            String?
+  resolved_at            DateTime?
   privacy_consent_record String
-  created_at             DateTime @default(now())
-  updated_at             DateTime @updatedAt
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
 
   @@map("contact_inquiries")
 }
@@ -51,7 +95,7 @@ model Admin {
   id            String             @id @default(cuid())
   email         String             @unique
   password_hash String
-  role          String             @default("Super Admin")
+  role          String             @default("Super Admin") // Super Admin | PR & Content Manager | IR & Compliance Officer | Partnership Manager
   is_active     Boolean            @default(true)
   last_login_at DateTime?
   created_at    DateTime           @default(now())
@@ -85,10 +129,12 @@ model AdminActivityLog {
   admin_id   String
   action     String
   target     String
+  ip_address String?
+  user_agent String?
+  metadata   String?
   created_at DateTime @default(now())
 
   admin Admin @relation(fields: [admin_id], references: [id], onDelete: Cascade)
 
   @@map("admin_activity_logs")
 }
-

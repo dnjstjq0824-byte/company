@@ -15,7 +15,6 @@ const ALLOWED_MIME_TYPES: Record<string, string> = {
 };
 
 function sanitizeSvgContent(svgText: string): string {
-  // Remove <script> tags, inline event handlers (on*), and javascript: URIs
   return svgText
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
     .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
@@ -88,29 +87,40 @@ export async function POST(request: NextRequest) {
       buffer = Buffer.from(cleanSvg, "utf8");
     }
 
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadsDir, { recursive: true });
+    let publicUrl: string;
 
-    const safeBaseName = file.name
-      .replace(/\.[^/.]+$/, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, "-")
-      .replace(/^-|-$/g, "")
-      .slice(0, 32);
+    try {
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      await fs.mkdir(uploadsDir, { recursive: true });
 
-    const uniqueName = `${safeBaseName || "asset"}-${crypto
-      .randomBytes(4)
-      .toString("hex")}${ext}`;
-    const targetPath = path.join(uploadsDir, uniqueName);
+      const safeBaseName = file.name
+        .replace(/\.[^/.]+$/, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9-]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 32);
 
-    await fs.writeFile(targetPath, buffer);
+      const uniqueName = `${safeBaseName || "asset"}-${crypto
+        .randomBytes(4)
+        .toString("hex")}${ext}`;
+      const targetPath = path.join(uploadsDir, uniqueName);
 
-    const publicUrl = `/uploads/${uniqueName}`;
+      await fs.writeFile(targetPath, buffer);
+      publicUrl = `/uploads/${uniqueName}`;
+    } catch (fsErr) {
+      // Serverless or read-only filesystem fallback: return base64 data URL
+      console.warn("Filesystem write unavailable, using inline Data URL fallback:", fsErr);
+      publicUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
+    }
 
     await logAdminActivity(
       admin.id,
       "UPLOAD_ASSET",
-      `Uploaded brand/logo asset ${publicUrl}`
+      `Uploaded asset ${publicUrl.startsWith("data:") ? "[Inline Base64 Asset]" : publicUrl}`,
+      {
+        ip_address: request.headers.get("x-forwarded-for") || "127.0.0.1",
+        user_agent: request.headers.get("user-agent") || "",
+      }
     );
 
     return NextResponse.json({
@@ -125,4 +135,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

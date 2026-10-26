@@ -5,6 +5,13 @@ import { sendInquiryNotificationEmail } from "@/lib/email";
 import { getAllSiteSettings } from "@/lib/data";
 
 const ALLOWED_INQUIRY_TYPES = [
+  "Strategic Partnership",
+  "Investor Relations (IR)",
+  "Media & Press",
+  "Enterprise Technology & API",
+  "Global Careers",
+  "General Corporate Inquiry",
+  // Backwards compatibility:
   "General Inquiry",
   "Business Partnership",
   "Platform Collaboration",
@@ -50,18 +57,19 @@ export async function POST(request: NextRequest) {
 
     // Honeypot anti-spam check
     if (body.website_honeypot && String(body.website_honeypot).trim() !== "") {
-      // Silently succeed for bots without storing spam
       return NextResponse.json({
         success: true,
         message:
-          "Thank you for contacting Booking Network Co., Ltd. Your message has been received. Our team will review your inquiry.",
+          "Thank you for contacting Booking Network Global Group. Your message has been received.",
       });
     }
 
     const full_name = sanitizeText(body.full_name, 120);
     const email = sanitizeText(body.email, 160).toLowerCase();
     const company = sanitizeText(body.company, 150);
+    const department = sanitizeText(body.department, 80) || "Global Partnership";
     const inquiry_type = sanitizeText(body.inquiry_type, 80);
+    const priority = sanitizeText(body.priority, 40) || "Normal";
     const subject = sanitizeText(body.subject, 200);
     const message = sanitizeText(body.message, 5000);
     const privacy_consent = Boolean(body.privacy_consent);
@@ -98,74 +106,73 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Duplicate submission protection within 2 minutes
-    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
-    const recentDuplicate = await prisma.contactInquiry.findFirst({
-      where: {
-        email,
-        subject,
-        message,
-        created_at: { gte: twoMinutesAgo },
-      },
-    });
-
-    if (recentDuplicate) {
-      return NextResponse.json(
-        {
-          error:
-            "This exact inquiry was just received moments ago. Our team has your message on file.",
-        },
-        { status: 409 }
-      );
-    }
-
     const consentRecord = JSON.stringify({
       consented: true,
       timestamp: new Date().toISOString(),
-      policy_version: "October 2026",
-      statement:
-        "I consent to Booking Network Co., Ltd. collecting and processing my submitted information to respond to this inquiry in accordance with the Privacy Policy.",
+      policy_version: "2026-10-v2-bngg",
+      ip_snippet: ip.slice(0, 16),
+      user_agent: request.headers.get("user-agent")?.slice(0, 150) || "",
     });
 
-    const created = await prisma.contactInquiry.create({
-      data: {
-        full_name,
-        email,
-        company: company || null,
-        inquiry_type,
-        subject,
-        message,
-        status: "New",
-        privacy_consent_record: consentRecord,
-      },
+    let savedId = "demo-" + Date.now();
+    if (prisma) {
+      const created = await prisma.contactInquiry.create({
+        data: {
+          full_name,
+          email,
+          company: company || null,
+          department,
+          inquiry_type,
+          priority: ["Low", "Normal", "High", "Urgent"].includes(priority) ? priority : "Normal",
+          subject,
+          message,
+          status: "New",
+          privacy_consent_record: consentRecord,
+        },
+      });
+      savedId = created.id;
+    }
+
+    // Attempt email notification asynchronously
+    try {
+      const settings = await getAllSiteSettings();
+      const notificationRecipient =
+        settings.contact_notification_email?.trim() ||
+        settings.corporate_email?.trim() ||
+        process.env.NOTIFICATION_EMAIL ||
+        "";
+
+      await sendInquiryNotificationEmail(
+        {
+          id: savedId,
+          full_name,
+          email,
+          company,
+          inquiry_type,
+          subject,
+          message,
+          created_at: new Date(),
+        },
+        notificationRecipient
+      );
+    } catch {
+      // Non-blocking email error
+    }
+
+    return NextResponse.json({
+      success: true,
+      id: savedId,
+      message:
+        "Thank you for contacting Booking Network Global Group. Your inquiry has been logged and routed to our team.",
     });
-
-    // Trigger notification email asynchronously or safely without exposing credentials
-    const settings = await getAllSiteSettings();
-    const notificationRecipient =
-      settings.contact_notification_email || settings.corporate_email || "";
-
-    await sendInquiryNotificationEmail(created, notificationRecipient);
-
-    return NextResponse.json(
-      {
-        success: true,
-        id: created.id,
-        created_at: created.created_at,
-        message:
-          "Thank you for contacting Booking Network Co., Ltd. Your message has been received. Our team will review your inquiry.",
-      },
-      { status: 201 }
-    );
   } catch (error) {
-    console.error("Contact submission error:", error);
+    console.error("Contact API error:", error);
     return NextResponse.json(
       {
         error:
-          "An unexpected server error occurred while processing your inquiry. Please try again shortly.",
+          "An unexpected server error occurred. Please try again or reach our team via corporate email.",
       },
       { status: 500 }
     );
   }
 }
-

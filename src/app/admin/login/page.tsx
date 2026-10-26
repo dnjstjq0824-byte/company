@@ -65,7 +65,7 @@ function LoginFormInner() {
               Restricted Access
             </span>
             <h1 className="font-display text-2xl font-extrabold text-white">
-              Booking Network Co., Ltd.
+              Booking Network Global Group
             </h1>
           </div>
         </div>

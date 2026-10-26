@@ -1,132 +1,139 @@
-# Booking Network Co., Ltd. — Official Corporate Website & Platform Portfolio
+# Booking Network Global Group — Official Corporate Portal & Enterprise Governance System
 
-Official global corporate portal and digital platform portfolio directory for **Booking Network Co., Ltd.**
+Official global corporate portal and enterprise administration platform for **Booking Network Global Group** (부킹네트워크글로벌그룹).
 
-**"Connecting Platforms. Expanding Possibilities."**
-
----
-
-## 1. Architecture & Technology Stack
-
-| Layer | Technology |
-|---|---|
-| **Framework** | Next.js 15 (App Router) + React 19 + TypeScript |
-| **Styling** | Tailwind CSS 3 (Clean White, Dark Navy `#0b192c`, Electric Blue `#2563eb`, Dark Mode support) |
-| **Database & ORM** | Prisma 6 ORM with persistent SQLite (`prisma/dev.db`) out of the box; zero-change switchable to PostgreSQL via `DATABASE_URL` |
-| **Authentication** | Administrator-only HTTP-only signed JWT sessions (`jose`) + `bcryptjs` password hashing + IP rate limiting |
-| **Email Notifications** | `nodemailer` SMTP transport with automatic fallback when SMTP is not yet configured |
-| **SEO & Indexing** | Dynamic `/sitemap.xml`, `/robots.txt`, JSON-LD `Organization` structured data, Open Graph metadata, canonical URLs |
+> **"Architecting the Global Digital Backbone. Connecting Next-Generation Platforms."**
 
 ---
 
-## 2. Platform Portfolio (10 Initial Seeded Platforms)
+## 1. Group Architecture & Mission
 
-1. **OLMOA** (`/platforms/olmoa`) — Global E-Commerce
-2. **getforTrip** (`/platforms/getfortrip`) — Online Travel Agency
-3. **TripScanner** (`/platforms/tripscanner`) — Travel Metasearch
-4. **CryptoScanner** (`/platforms/cryptoscanner`) — Cryptocurrency Information
-5. **StockScanner** (`/platforms/stockscanner`) — Stock Market Information
-6. **Treewiki** (`/platforms/treewiki`) — Knowledge & Information
-7. **treescanr** (`/platforms/treescanr`) — General Search Engine
-8. **Global Video Platform** (`/platforms/global-video`) — Video & Media *(provisional label, editable in Admin)*
-9. **Global Messenger** (`/platforms/global-messenger`) — Communication *(provisional label, editable in Admin)*
-10. **Global Shortform Platform** (`/platforms/global-shortform`) — Short-Form Media *(provisional label, editable in Admin)*
+Booking Network Global Group operates as a premier Global IT Platform Group and digital infrastructure holding entity. The group architects, governs, and scales mission-critical edge computing, streaming AI engines, zero-trust financial architectures, and cross-border platform ecosystems.
+
+### 6 Core Business & Technology Divisions
+
+| Code | Division Name | Category | Primary Mandate |
+|---|---|---|---|
+| **BNG-INFRA-01** | **Global Cloud & Distributed Infrastructure** | Core Infrastructure | 45+ global edge POPs, carrier-grade multi-cloud routing, 99.999% SLA availability |
+| **BNG-DATA-02** | **AI & Data Intelligence Engine** | AI & Big Data | Streaming data pipelines, vector search indexing, predictive analytical intelligence |
+| **BNG-MESH-03** | **Global B2B Network & API Mesh** | B2B Platform & API | Sub-15ms universal API gateway, partner mesh interconnection, cross-border telemetry |
+| **BNG-TRUST-04** | **Enterprise FinTech & Trust Architecture** | FinTech & Cybersecurity | Zero-trust compliance (SOC 2 Type II, PCI-DSS L1), cryptographic data ledgers |
+| **BNG-STUDIO-05** | **Next-Gen Digital Ecosystem Studio** | Platform Incubation & Scale | Modular platform scaffolding, design systems, joint venture tech incubation |
+| **BNG-ESG-06** | **Global ESG & Sustainable Tech Initiative** | ESG & Governance | Carbon-aware cloud scheduling, 100% digital accessibility (WCAG 2.2 AAA), ethical AI |
 
 ---
 
-## 3. Local Setup & Development Instructions
+## 2. Technology Stack & Edge Architecture
+
+- **Core Framework**: [Next.js 15 (App Router)](https://nextjs.org/) + [React 19](https://react.dev/) + TypeScript
+- **Styling & UI**: Tailwind CSS 3 (Obsidian Navy `#030712`, Cobalt `#2563eb`, Electric Cyan `#38bdf8`) + Lucide Icons + Pretendard / Plus Jakarta Sans fonts
+- **Database & ORM**: Prisma 6 ORM with SQLite (`prisma/dev.db`) and zero-change switchable PostgreSQL/Cloudflare D1 compatibility
+- **Deployment & Edge Runtime**: Cloudflare Workers / Pages via `@opennextjs/cloudflare` + standalone Node.js server fallback
+- **Authentication**: Signed JWT session cookies (`jose`, HS256) with `bcryptjs` password hashing and RBAC (`Super Admin` vs `Content Manager`)
+- **Internationalization (i18n)**: English (`en`) & 한국어 (`ko`) runtime language switcher with React Context provider
+- **Audit & Governance**: Immutable activity logging capturing admin ID, action, target, client IP address, and user agent
+
+---
+
+## 3. Directory Structure
+
+```text
+├── prisma/
+│   ├── schema.prisma        # Database schema (Platform, NewsPost, GlobalHub, Admin, Inquiries, Logs)
+│   ├── seed.ts              # Seeding script for 6 Core Divisions, Hubs, News, and Site Settings
+│   └── dev.db               # SQLite database
+├── public/
+│   ├── logos/
+│   │   └── booking-network.svg  # Official lattice digital backbone monogram
+│   └── uploads/             # Media assets
+├── src/
+│   ├── app/
+│   │   ├── (public)         # /, /about, /platforms, /platforms/[slug], /newsroom, /newsroom/[slug], /contact, /privacy, /terms
+│   │   ├── admin/           # /admin, /admin/platforms, /admin/newsroom, /admin/network, /admin/content, /admin/inquiries, /admin/settings, /admin/security
+│   │   ├── api/             # /api/contact, /api/admin/*
+│   │   ├── globals.css      # Custom styling, fonts, and dark theme variables
+│   │   └── layout.tsx       # Root layout with LanguageProvider and global announcement bar
+│   ├── components/
+│   │   ├── ArchitectureBlueprint.tsx   # Interactive 4-tier system blueprint
+│   │   ├── BentoGrid.tsx               # Strategic governance asymmetric grid
+│   │   ├── NetworkTopologyMatrix.tsx   # Real-time infrastructure telemetry matrix
+│   │   ├── NewsroomSection.tsx         # Public news & IR cards
+│   │   ├── PlatformCard.tsx            # Division card with division codes & metrics
+│   │   ├── admin/                      # AdminShell and management components
+│   │   └── Header.tsx / Footer.tsx     # Corporate navigation with EN|KO switcher
+│   └── lib/
+│       ├── auth.ts          # JWT session creation, verification & activity logging
+│       ├── data.ts          # High-performance cached database queries with fallbacks
+│       ├── default-data.ts  # Fallback & seed datasets for 6 divisions, hubs & news
+│       ├── i18n.tsx         # Bilingual dictionary and React LanguageContext
+│       └── prisma.ts        # Prisma client singleton
+```
+
+---
+
+## 4. Local Development & Setup
 
 ### Prerequisites
 - Node.js 18.18+ or 20+ / 24+
-- npm 9+
+- npm 10+
 
-### Step 1 — Install Dependencies
+### 1. Installation
 ```bash
-npm install
+npm clean-install
 ```
 
-### Step 2 — Configure Environment Variables
-Copy `.env.example` to `.env` and set your environment variables:
-```bash
-cp .env.example .env
+### 2. Environment Configuration
+Ensure `.env` contains:
+```env
+DATABASE_URL="file:./dev.db"
+AUTH_SECRET="your-secure-32-byte-secret-key-here"
+NEXT_PUBLIC_SITE_URL="http://localhost:3000"
 ```
-Required variables in `.env`:
-- `DATABASE_URL="file:./dev.db"` (or PostgreSQL connection URL in production)
-- `AUTH_SECRET="<random-32+-byte-secret>"`
-- `NEXT_PUBLIC_SITE_URL="http://localhost:3000"`
 
-### Step 3 — Run Database Migrations & Seed Data
+### 3. Database Initialization & Seeding
 ```bash
-npx prisma migrate dev
+npx prisma db push
 npm run db:seed
 ```
-When `npm run db:seed` runs for the first time, it:
-1. Seeds all **10 platform portfolio entries**.
-2. Seeds **corporate site settings** and **CMS content pages** (`/`, `/about`, `/privacy`, `/terms`).
-3. Securely provisions the initial Super Admin account without hardcoding any password in source code, writing the generated credentials to `.admin-credentials.local.txt` (which is excluded from Git via `.gitignore`).
+*Note: The seed script outputs Super Admin credentials to `.admin-credentials.local.txt` (excluded by `.gitignore`).*
 
-### Step 4 — Start the Development Server
+### 4. Run Development Server
 ```bash
 npm run dev
 ```
-Open `http://localhost:3000` in your browser.
+Open [http://localhost:3000](http://localhost:3000) to view the portal.
 
-### Step 5 — Production Build & Start
+### 5. Production Build
 ```bash
 npm run build
-npm run start
 ```
+*(Build executes `next build && opennextjs-cloudflare build --skipNextBuild` in standalone mode, guaranteeing zero build loop recursion).*
 
 ---
 
-## 4. Administrator Usage Guide
+## 5. Enterprise Administration Modules (`/admin/*`)
 
-### 4.1 Signing In (`/admin/login`)
-- Navigate to `/admin/login`.
-- Retrieve your generated administrator credentials from `.admin-credentials.local.txt` (or provision a custom administrator using the CLI command below):
-  ```bash
-  npm run db:provision-admin -- --email=admin@bookingnetwork.co --password="YourStrongPassword123!"
-  ```
-- Public visitors cannot register or access any `/admin/*` or `/api/admin/*` routes.
-
-### 4.2 Dashboard Overview (`/admin`)
-- Displays real-time database counts for **Total Platforms**, **Live Platforms**, **In-Development / Coming Soon Platforms**, **Unread Contact Inquiries**, **Total Contact Inquiries**, and **Recent Administrative Activity Logs**.
-
-### 4.3 Managing Platforms (`/admin/platforms`)
-- **Add / Edit Platforms:** Click **Add New Platform** or the edit icon on any row.
-- **Provisional Platform Labels:** Rename *Global Video Platform*, *Global Messenger*, or *Global Shortform Platform* (and update their slugs/logos) at any time as official branding is finalized.
-- **Statuses:** Set any platform to `Live`, `Coming Soon`, `In Development`, or `Temporarily Unavailable`.
-- **Official External Website Links:** Set `website_url` (e.g., `https://olmoa.com`). For visitor safety, external links are only activated on public cards and detail pages when a valid `http(s)://` URL is configured **and** the platform status is set to `Live`.
-- **Publication Control:** Switch between `Published`, `Draft`, or `Archived` to control public visibility and search engine indexing.
-- **Logo Uploads:** Upload `.svg`, `.png`, `.jpg`, or `.webp` logos (validated for MIME type, magic bytes, and SVG script sanitization).
-
-### 4.4 Website Content Management (`/admin/content`)
-- Edit structured content and SEO metadata for:
-  - **Homepage (`/`)**: Hero badge, headline, supporting text, About section, Connected Ecosystem text, and Partnership CTA.
-  - **About Us (`/about`)**: Corporate overview, Vision, Mission, Global Platform Strategy.
-  - **Privacy Policy (`/privacy`)** & **Terms of Use (`/terms`)**: Full Markdown policy body, status badge, and revision date.
-
-### 4.5 Contact Inquiry Management (`/admin/inquiries`)
-- View all inquiries submitted through `/contact`.
-- Filter by **Inquiry Type** or **Status** (`New`, `In Progress`, `Resolved`), or search by sender name, email, organization, or subject.
-- Record **Private Administrator Notes** on any inquiry.
-- Click **Export Inquiries to CSV** to download a complete spreadsheet of all inquiries.
-
-### 4.6 Corporate Settings (`/admin/settings`)
-- Configure **Company Display Name**, **Tagline**, **Corporate Email**, **Telephone**, **Business Address**, **Operating Hours**, **Website Domain**, **Social Media Links**, **Brand Logo**, and **Favicon**.
-- Any contact detail left blank is automatically hidden on the public website so unverified or placeholder contact details are never displayed.
-
-### 4.7 Security & Activity Audit Logs (`/admin/security`)
-- Rotate your administrator password.
-- Provision additional authorized administrators (`Super Admin` or `Content Manager`) or deactivate accounts.
-- Audit the chronological **Administrator Activity Log**.
+1. **Executive Command Dashboard** (`/admin`):
+   - Real-time strategic telemetry (Core Divisions, Newsroom Disclosures, Infrastructure Nodes, Inquiry triage).
+   - System runtime diagnostics (Prisma SQLite, JWT Token Auth, Edge Gateway).
+2. **Business & Tech Divisions CMS** (`/admin/platforms`):
+   - Full CRUD for the 6 core business pillars with `division_code` (e.g. `BNG-INFRA-01`), icon selector, and dynamic numerical `key_metrics` builder.
+3. **Newsroom & IR Disclosures** (`/admin/newsroom`):
+   - Press releases, IR disclosures, and technical whitepapers with live Markdown preview and featured homepage toggle.
+4. **Global Network & Hubs** (`/admin/network`):
+   - Manage regional headquarters, R&D campuses, and edge cloud nodes (Seoul, San Jose, Frankfurt, Dubai).
+5. **Website Content CMS** (`/admin/content`):
+   - Dynamic array form builder for hero metrics, strategic business areas, and rich Markdown editor for legal privacy/terms.
+6. **Enterprise Inquiries CRM** (`/admin/inquiries`):
+   - Filterable CRM with priority classification (Urgent/High/Normal/Low), department dispatch, internal governance notes, and CSV export.
+7. **Corporate Settings & Governance** (`/admin/settings`):
+   - Group identity, bilingual Korean/English titles, default language (`en`/`ko`), and global top announcement bar toggle.
+8. **Security Governance & Audit Trail** (`/admin/security`):
+   - Role-Based Access Control (`Super Admin` vs `Content Manager`), credential rotation, and audit logs with IP addresses and user agents.
 
 ---
 
-## 5. Production Deployment & PostgreSQL Migration
+## 6. Security & Legal Notice
 
-To switch from local SQLite to managed **PostgreSQL** in production:
-1. Update `provider = "postgresql"` in `prisma/schema.prisma`.
-2. Set `DATABASE_URL="postgresql://user:password@host:5432/booking_network?schema=public"` in your production environment variables.
-3. Run `npx prisma migrate deploy && npm run db:seed`.
-
+© 2026 Booking Network Global Group (부킹네트워크글로벌그룹). All rights reserved.
+Unpublished administrative endpoints and proprietary API mesh architecture are strictly protected under international intellectual property and cybersecurity laws.

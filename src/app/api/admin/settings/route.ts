@@ -24,6 +24,10 @@ const ALLOWED_SETTING_KEYS = [
   "brand_logo",
   "favicon",
   "cookie_consent_enabled",
+  "default_locale",
+  "announcement_bar_enabled",
+  "announcement_bar_text",
+  "announcement_bar_link",
 ];
 
 export async function GET() {
@@ -69,7 +73,11 @@ export async function PUT(request: NextRequest) {
     await logAdminActivity(
       admin.id,
       "UPDATE_SITE_SETTINGS",
-      `Updated corporate settings (${updatedKeys.length} fields)`
+      `Updated corporate settings (${updatedKeys.length} fields: ${updatedKeys.slice(0, 5).join(", ")}${updatedKeys.length > 5 ? "..." : ""})`,
+      {
+        ip_address: request.headers.get("x-forwarded-for") || "127.0.0.1",
+        user_agent: request.headers.get("user-agent") || "",
+      }
     );
 
     revalidatePath("/", "layout");
@@ -84,4 +92,3 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
-

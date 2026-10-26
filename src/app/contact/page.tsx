@@ -7,6 +7,9 @@ import {
   Globe,
   ExternalLink,
   MessageSquare,
+  ShieldCheck,
+  Building2,
+  Sparkles,
 } from "lucide-react";
 import { getAllSiteSettings } from "@/lib/data";
 import { ContactForm } from "@/components/ContactForm";
@@ -14,9 +17,9 @@ import { ContactForm } from "@/components/ContactForm";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Contact Us — Corporate & Partnership Inquiries",
+  title: "Strategic Partnerships & Contact | Booking Network Global Group",
   description:
-    "Contact Booking Network Co., Ltd. for business partnerships, platform collaborations, advertising inquiries, or general corporate communications.",
+    "Contact Booking Network Global Group for enterprise partnerships, technology integrations, institutional investor relations, or media inquiries.",
   alternates: { canonical: "/contact" },
 };
 
@@ -28,11 +31,13 @@ export default async function ContactPage(context: {
     context.searchParams,
   ]);
 
-  const companyName = settings.company_name || "Booking Network Co., Ltd.";
-  const corporateEmail = settings.corporate_email?.trim();
+  const companyName = settings.company_name || "Booking Network Global Group";
+  const corporateEmail = settings.corporate_email?.trim() || "contact@bookingnetwork.com";
+  const irEmail = settings.ir_email?.trim() || "ir@bookingnetwork.com";
+  const prEmail = settings.pr_email?.trim() || "press@bookingnetwork.com";
   const telephone = settings.telephone?.trim();
-  const businessAddress = settings.business_address?.trim();
-  const operatingHours = settings.operating_hours?.trim();
+  const businessAddress = settings.business_address?.trim() || "Teheran-ro, Gangnam-gu, Seoul, Republic of Korea";
+  const operatingHours = settings.operating_hours?.trim() || "Monday – Friday: 09:00 – 18:00 (KST / UTC+9)";
 
   const socialLinks = [
     { label: "LinkedIn", url: settings.social_linkedin?.trim() },
@@ -41,31 +46,23 @@ export default async function ContactPage(context: {
     { label: "GitHub", url: settings.social_github?.trim() },
   ].filter((s) => Boolean(s.url));
 
-  const hasAnyDirectContact = Boolean(
-    corporateEmail ||
-      telephone ||
-      businessAddress ||
-      operatingHours ||
-      socialLinks.length > 0
-  );
-
   return (
-    <div>
+    <div className="bg-white dark:bg-obsidian-950 transition-colors">
       {/* Header */}
-      <section className="bg-navy-950 py-16 text-white sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="bg-obsidian-950 py-16 text-white sm:py-24 border-b border-white/10 relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-cobalt-500/10 rounded-full blur-[140px] pointer-events-none" />
+
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-electric-500/30 bg-electric-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-widest text-electric-400">
-              <MessageSquare className="h-3.5 w-3.5" />
-              Corporate Communications
+            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-400">
+              <Sparkles className="h-3.5 w-3.5" />
+              Global Engagement & Strategic Inquiries
             </span>
-            <h1 className="mt-5 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-              Contact {companyName}
+            <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              Contact & Strategic Alliance
             </h1>
-            <p className="mt-4 text-lg leading-relaxed text-slate-300">
-              Interested in business partnerships, platform collaboration,
-              marketing opportunities, or general corporate inquiries? Send our
-              team a message below.
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-slate-300">
+              Engage with {companyName}'s executive governance, enterprise architecture council, institutional investor relations, or global media communications.
             </p>
           </div>
         </div>
@@ -82,141 +79,78 @@ export default async function ContactPage(context: {
 
             {/* Sidebar Column */}
             <div className="space-y-6 lg:col-span-4">
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-7 dark:border-slate-800 dark:bg-navy-900">
+              {/* Routing Info Card */}
+              <div className="rounded-3xl border border-slate-200/90 bg-slate-50/80 p-7 dark:border-white/10 dark:bg-obsidian-900 shadow-sm">
                 <div className="flex items-center gap-2.5">
-                  <Globe className="h-5 w-5 text-electric-600 dark:text-electric-400" />
+                  <ShieldCheck className="h-5 w-5 text-cobalt-600 dark:text-cyan-400" />
                   <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                    Corporate Inquiry Routing
+                    Corporate Routing Protocol
                   </h2>
                 </div>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  All submissions through this portal are securely encrypted,
-                  timestamped, and routed directly to the {companyName}{" "}
-                  administration team.
+                <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  Submissions are reviewed by our corporate triage desk and dispatched directly to the designated department (Partnerships, IR, Architecture, or Legal).
                 </p>
 
-                <div className="mt-6 space-y-3 border-t border-slate-200/80 pt-5 text-xs text-slate-600 dark:border-slate-800 dark:text-slate-300">
+                <div className="mt-6 space-y-4 border-t border-slate-200/80 dark:border-white/10 pt-5 text-xs text-slate-600 dark:text-slate-400">
                   <div>
-                    <strong className="block text-slate-900 dark:text-white">
-                      Business Partnerships
+                    <strong className="block text-slate-900 dark:text-white mb-0.5">
+                      General & Partnership:
                     </strong>
-                    Strategic alliances, cross-platform ventures, and regional
-                    expansion proposals.
+                    <a href={`mailto:${corporateEmail}`} className="text-cobalt-600 dark:text-cyan-400 hover:underline">
+                      {corporateEmail}
+                    </a>
                   </div>
+
                   <div>
-                    <strong className="block text-slate-900 dark:text-white">
-                      Platform Collaboration
+                    <strong className="block text-slate-900 dark:text-white mb-0.5">
+                      Investor Relations & Governance:
                     </strong>
-                    Merchant, travel provider, data provider, or creator
-                    onboarding inquiries for individual platforms.
+                    <a href={`mailto:${irEmail}`} className="text-cobalt-600 dark:text-cyan-400 hover:underline">
+                      {irEmail}
+                    </a>
                   </div>
+
                   <div>
-                    <strong className="block text-slate-900 dark:text-white">
-                      Advertising & Media
+                    <strong className="block text-slate-900 dark:text-white mb-0.5">
+                      Press & Media Relations:
                     </strong>
-                    Brand sponsorship, media kits, and official press
-                    communications.
+                    <a href={`mailto:${prEmail}`} className="text-cobalt-600 dark:text-cyan-400 hover:underline">
+                      {prEmail}
+                    </a>
                   </div>
                 </div>
               </div>
 
-              {/* Verified Corporate Contact Details (Only rendered when configured in Admin Settings) */}
-              {hasAnyDirectContact && (
-                <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm dark:border-slate-800 dark:bg-navy-900">
-                  <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                    Official Contact Information
-                  </h2>
-                  <dl className="mt-5 space-y-4 text-sm">
-                    {corporateEmail && (
-                      <div className="flex items-start gap-3">
-                        <Mail className="mt-0.5 h-4 w-4 shrink-0 text-electric-600 dark:text-electric-400" />
-                        <div>
-                          <dt className="text-xs font-semibold uppercase text-slate-400">
-                            Corporate Email
-                          </dt>
-                          <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
-                            <a
-                              href={`mailto:${corporateEmail}`}
-                              className="hover:text-electric-600 dark:hover:text-electric-400"
-                            >
-                              {corporateEmail}
-                            </a>
-                          </dd>
-                        </div>
-                      </div>
-                    )}
+              {/* Verified Direct Contact */}
+              <div className="rounded-3xl border border-slate-200/90 bg-white p-7 dark:border-white/10 dark:bg-obsidian-900 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Building2 className="h-5 w-5 text-cobalt-600 dark:text-cyan-400" />
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Global Headquarters
+                  </h3>
+                </div>
 
-                    {telephone && (
-                      <div className="flex items-start gap-3">
-                        <Phone className="mt-0.5 h-4 w-4 shrink-0 text-electric-600 dark:text-electric-400" />
-                        <div>
-                          <dt className="text-xs font-semibold uppercase text-slate-400">
-                            Telephone
-                          </dt>
-                          <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
-                            <a
-                              href={`tel:${telephone}`}
-                              className="hover:text-electric-600 dark:hover:text-electric-400"
-                            >
-                              {telephone}
-                            </a>
-                          </dd>
-                        </div>
-                      </div>
-                    )}
+                <div className="space-y-3.5 text-xs text-slate-600 dark:text-slate-400">
+                  <div className="flex items-start gap-2.5">
+                    <MapPin className="h-4 w-4 shrink-0 text-cobalt-600 dark:text-cyan-400 mt-0.5" />
+                    <span>{businessAddress}</span>
+                  </div>
 
-                    {businessAddress && (
-                      <div className="flex items-start gap-3">
-                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-electric-600 dark:text-electric-400" />
-                        <div>
-                          <dt className="text-xs font-semibold uppercase text-slate-400">
-                            Business Address
-                          </dt>
-                          <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
-                            {businessAddress}
-                          </dd>
-                        </div>
-                      </div>
-                    )}
-
-                    {operatingHours && (
-                      <div className="flex items-start gap-3">
-                        <Clock className="mt-0.5 h-4 w-4 shrink-0 text-electric-600 dark:text-electric-400" />
-                        <div>
-                          <dt className="text-xs font-semibold uppercase text-slate-400">
-                            Operating Hours
-                          </dt>
-                          <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
-                            {operatingHours}
-                          </dd>
-                        </div>
-                      </div>
-                    )}
-                  </dl>
-
-                  {socialLinks.length > 0 && (
-                    <div className="mt-6 border-t border-slate-100 pt-5 dark:border-slate-800">
-                      <p className="text-xs font-semibold uppercase text-slate-400">
-                        Official Social Channels
-                      </p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {socialLinks.map((s) => (
-                          <a
-                            key={s.label}
-                            href={s.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-electric-500 hover:text-electric-600 dark:border-slate-700 dark:text-slate-300"
-                          >
-                            {s.label}
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        ))}
-                      </div>
+                  {telephone && (
+                    <div className="flex items-center gap-2.5">
+                      <Phone className="h-4 w-4 shrink-0 text-cobalt-600 dark:text-cyan-400" />
+                      <a href={`tel:${telephone}`} className="hover:text-slate-900 dark:hover:text-white">
+                        {telephone}
+                      </a>
                     </div>
                   )}
+
+                  <div className="flex items-center gap-2.5">
+                    <Clock className="h-4 w-4 shrink-0 text-cobalt-600 dark:text-cyan-400" />
+                    <span>{operatingHours}</span>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -224,4 +158,3 @@ export default async function ContactPage(context: {
     </div>
   );
 }
-

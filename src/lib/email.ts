@@ -45,7 +45,7 @@ export async function sendInquiryNotificationEmail(
         replyTo: inquiry.email,
         subject: `[Booking Network Inquiry: ${inquiry.inquiry_type}] ${inquiry.subject}`,
         text: [
-          `New inquiry submitted on the Booking Network Co., Ltd. Corporate Website:`,
+          `New inquiry submitted on the Booking Network Global Group Corporate Website:`,
           ``,
           `Reference ID : ${inquiry.id}`,
           `Sender Name  : ${inquiry.full_name}`,

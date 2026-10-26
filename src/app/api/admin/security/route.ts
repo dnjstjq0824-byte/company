@@ -28,7 +28,7 @@ export async function GET() {
         },
       },
       orderBy: { created_at: "desc" },
-      take: 60,
+      take: 100,
     }),
   ]);
 
@@ -41,17 +41,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (admin.role !== "Super Admin") {
-    return NextResponse.json(
-      { error: "Only Super Admins can provision or modify administrator accounts." },
-      { status: 403 }
-    );
-  }
+  const ip_address = request.headers.get("x-forwarded-for") || "127.0.0.1";
+  const user_agent = request.headers.get("user-agent") || "";
 
   try {
     const body = await request.json();
     const action = String(body.action || "");
 
+    // 1. Password change: Any authenticated admin can change their own password
     if (action === "change_password") {
       const currentPassword = String(body.current_password || "");
       const newPassword = String(body.new_password || "");
@@ -90,13 +87,22 @@ export async function POST(request: NextRequest) {
       await logAdminActivity(
         admin.id,
         "CHANGE_ADMIN_PASSWORD",
-        `Changed password for ${admin.email}`
+        `Changed account password for ${admin.email}`,
+        { ip_address, user_agent }
       );
 
       return NextResponse.json({
         success: true,
         message: "Password updated successfully.",
       });
+    }
+
+    // All following account provisioning/status modification actions require Super Admin privileges
+    if (admin.role !== "Super Admin") {
+      return NextResponse.json(
+        { error: "Only Super Admins can provision or modify administrator accounts." },
+        { status: 403 }
+      );
     }
 
     if (action === "create_admin") {
@@ -149,7 +155,8 @@ export async function POST(request: NextRequest) {
       await logAdminActivity(
         admin.id,
         "PROVISION_ADDITIONAL_ADMIN",
-        `Provisioned administrator ${created.email} (${created.role})`
+        `Provisioned administrator ${created.email} (${created.role})`,
+        { ip_address, user_agent }
       );
 
       return NextResponse.json({ admin: created }, { status: 201 });
@@ -188,7 +195,8 @@ export async function POST(request: NextRequest) {
       await logAdminActivity(
         admin.id,
         "TOGGLE_ADMIN_STATUS",
-        `Set administrator ${updated.email} active=${updated.is_active}`
+        `Set administrator ${updated.email} active=${updated.is_active}`,
+        { ip_address, user_agent }
       );
 
       return NextResponse.json({ admin: updated });
@@ -203,4 +211,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

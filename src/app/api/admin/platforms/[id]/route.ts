@@ -27,7 +27,7 @@ export async function PATCH(
     const existing = await prisma.platform.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json(
-        { error: "Platform not found." },
+        { error: "Platform division not found." },
         { status: 404 }
       );
     }
@@ -44,10 +44,18 @@ export async function PATCH(
             .replace(/[^a-z0-9-]+/g, "-")
             .replace(/^-|-$/g, "")
         : existing.slug;
+    const division_code =
+      body.division_code !== undefined
+        ? String(body.division_code).trim()
+        : existing.division_code;
     const category =
       body.category !== undefined
         ? String(body.category).trim()
         : existing.category;
+    const icon_name =
+      body.icon_name !== undefined
+        ? String(body.icon_name).trim()
+        : existing.icon_name;
     const short_description =
       body.short_description !== undefined
         ? String(body.short_description).trim()
@@ -114,7 +122,7 @@ export async function PATCH(
       const slugConflict = await prisma.platform.findUnique({ where: { slug } });
       if (slugConflict && slugConflict.id !== id) {
         return NextResponse.json(
-          { error: `Another platform already uses slug '${slug}'.` },
+          { error: `Another platform division already uses slug '${slug}'.` },
           { status: 409 }
         );
       }
@@ -131,16 +139,35 @@ export async function PATCH(
       featuresString = JSON.stringify(featuresArray);
     }
 
+    let keyMetricsString = existing.key_metrics;
+    if (body.key_metrics !== undefined) {
+      if (Array.isArray(body.key_metrics)) {
+        keyMetricsString = JSON.stringify(
+          body.key_metrics
+            .map((m: { label?: string; value?: string }) => ({
+              label: String(m.label || "").trim(),
+              value: String(m.value || "").trim(),
+            }))
+            .filter((m: { label: string; value: string }) => m.label && m.value)
+        );
+      } else if (typeof body.key_metrics === "string") {
+        keyMetricsString = body.key_metrics;
+      }
+    }
+
     const updated = await prisma.platform.update({
       where: { id },
       data: {
         name,
         slug,
+        division_code,
         category,
+        icon_name,
         short_description,
         full_description,
         logo,
         features: featuresString,
+        key_metrics: keyMetricsString,
         target_audience,
         business_purpose,
         website_url,
@@ -155,7 +182,11 @@ export async function PATCH(
     await logAdminActivity(
       admin.id,
       "UPDATE_PLATFORM",
-      `Updated platform '${updated.name}' (status: ${updated.platform_status}, pub: ${updated.publication_status})`
+      `Updated platform division '${updated.name}' (${updated.division_code})`,
+      {
+        ip_address: request.headers.get("x-forwarded-for") || "127.0.0.1",
+        user_agent: request.headers.get("user-agent") || "",
+      }
     );
 
     revalidatePath("/");
@@ -166,16 +197,16 @@ export async function PATCH(
 
     return NextResponse.json({ platform: parsePlatformRecord(updated) });
   } catch (error) {
-    console.error("Error updating platform:", error);
+    console.error("Error updating platform division:", error);
     return NextResponse.json(
-      { error: "Failed to update platform entry." },
+      { error: "Failed to update platform division entry." },
       { status: 500 }
     );
   }
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const admin = await getAuthenticatedAdmin();
@@ -188,7 +219,7 @@ export async function DELETE(
     const existing = await prisma.platform.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json(
-        { error: "Platform not found." },
+        { error: "Platform division not found." },
         { status: 404 }
       );
     }
@@ -198,7 +229,11 @@ export async function DELETE(
     await logAdminActivity(
       admin.id,
       "DELETE_PLATFORM",
-      `Deleted platform '${existing.name}' (${existing.slug})`
+      `Deleted platform division '${existing.name}' (${existing.division_code || existing.slug})`,
+      {
+        ip_address: request.headers.get("x-forwarded-for") || "127.0.0.1",
+        user_agent: request.headers.get("user-agent") || "",
+      }
     );
 
     revalidatePath("/");
@@ -208,11 +243,10 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting platform:", error);
+    console.error("Error deleting platform division:", error);
     return NextResponse.json(
-      { error: "Failed to delete platform entry." },
+      { error: "Failed to delete platform division entry." },
       { status: 500 }
     );
   }
 }
-
