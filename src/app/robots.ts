@@ -6,9 +6,9 @@ export const dynamic = "force-dynamic";
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const settings = await getAllSiteSettings();
   const baseUrl = (
-    settings.website_domain ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "http://localhost:3000"
+    settings.website_domain ||
+    "https://company.dnjstjq0824.workers.dev"
   ).replace(/\/$/, "");
 
   return {

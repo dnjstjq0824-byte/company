@@ -2,19 +2,22 @@ import type { NextConfig } from "next";
 import { execSync } from "child_process";
 
 function resolveCommitSha(): string {
-  if (process.env.CF_PAGES_COMMIT_SHA) {
-    return process.env.CF_PAGES_COMMIT_SHA.slice(0, 7);
-  }
-  if (process.env.WORKERS_CI_COMMIT_SHA) {
-    return process.env.WORKERS_CI_COMMIT_SHA.slice(0, 7);
-  }
-  if (process.env.GITHUB_SHA) {
-    return process.env.GITHUB_SHA.slice(0, 7);
+  const envSha =
+    process.env.CF_PAGES_COMMIT_SHA ||
+    process.env.WORKERS_CI_COMMIT_SHA ||
+    process.env.GITHUB_SHA ||
+    process.env.COMMIT_SHA;
+  if (envSha && envSha.trim().length >= 7) {
+    return envSha.trim().slice(0, 7);
   }
   try {
-    return execSync("git rev-parse --short HEAD").toString().trim();
+    const gitSha = execSync("git rev-parse HEAD").toString().trim();
+    if (gitSha && gitSha.length >= 7) {
+      return gitSha.slice(0, 7);
+    }
+    return "unknown";
   } catch {
-    return "7124f55";
+    return "unknown";
   }
 }
 

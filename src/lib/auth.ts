@@ -6,9 +6,12 @@ const SESSION_COOKIE_NAME = "bn_admin_session";
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 12; // 12 hours
 
 function getSecretKey(): Uint8Array {
-  const secret =
-    process.env.AUTH_SECRET ||
-    "bn_fallback_dev_secret_do_not_use_in_prod_9876543210";
+  const secret = process.env.AUTH_SECRET;
+  if (!secret || secret.trim().length === 0) {
+    throw new Error(
+      "[Security] AUTH_SECRET environment variable is missing or empty. Admin authentication is disabled."
+    );
+  }
   return new TextEncoder().encode(secret);
 }
 

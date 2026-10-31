@@ -16,13 +16,17 @@ function base64UrlToUint8Array(base64Url: string): Uint8Array {
 
 async function verifyJwtEdge(token: string): Promise<boolean> {
   try {
+    const secret = process.env.AUTH_SECRET;
+    if (!secret || secret.trim().length === 0) {
+      console.error(
+        "[Security] AUTH_SECRET is not configured in environment. Rejecting authentication."
+      );
+      return false;
+    }
+
     const parts = token.split(".");
     if (parts.length !== 3) return false;
     const [headerB64, payloadB64, signatureB64] = parts;
-
-    const secret =
-      process.env.AUTH_SECRET ||
-      "bn_fallback_dev_secret_do_not_use_in_prod_9876543210";
 
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(

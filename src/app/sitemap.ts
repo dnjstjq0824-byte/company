@@ -10,9 +10,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   const baseUrl = (
-    settings.website_domain ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "http://localhost:3000"
+    settings.website_domain ||
+    "https://company.dnjstjq0824.workers.dev"
   ).replace(/\/$/, "");
 
   const staticRoutes: MetadataRoute.Sitemap = [
