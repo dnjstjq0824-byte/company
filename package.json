@@ -2,8 +2,12 @@
   "name": "company",
   "version": "1.0.1",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev",
+    "test": "tsx --test tests/**/*.test.ts",
     "postinstall": "prisma generate",
     "build": "prisma generate && next build && opennextjs-cloudflare build --skipNextBuild",
     "cf:build": "prisma generate && next build && opennextjs-cloudflare build --skipNextBuild",

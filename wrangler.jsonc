@@ -7,5 +7,11 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
-  }
+  },
+  // Production secrets (set via `wrangler secret put`, never committed):
+  //   AUTH_SECRET  - required; admin JWT signing secret (fail-closed when missing)
+  //   DATABASE_URL - optional; persistent DB (e.g. Neon/Supabase Postgres).
+  //                  When omitted, public pages render from built-in defaults
+  //                  and contact inquiries rely on SMTP notification only.
+  // Optional plain vars (non-secret) can be declared here under "vars".
 }

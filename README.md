@@ -60,27 +60,36 @@ Booking Network Global Group operates as a premier Global IT Platform Group and 
 ├── src/
 │   ├── app/
 │   │   ├── (public)         # /, /about, /platforms, /platforms/[slug], /newsroom, /newsroom/[slug], /contact, /privacy, /terms
-│   │   ├── admin/           # /admin, /admin/platforms, /admin/newsroom, /admin/network, /admin/content, /admin/inquiries, /admin/settings, /admin/security
-│   │   ├── api/             # /api/contact, /api/version, /api/admin/*
+│   │   ├── admin/           # /admin (+7 CMS modules), /admin/error.tsx (console error boundary)
+│   │   ├── api/             # /api/contact, /api/version (with DB health), /api/admin/*
+│   │   ├── error.tsx        # Public error boundary with retry
 │   │   ├── globals.css      # Custom styling, fonts, and dark theme variables
 │   │   ├── layout.tsx       # Root layout with LanguageProvider and global announcement bar
 │   │   ├── robots.ts        # Dynamic robots.txt
-│   │   └── sitemap.ts       # Dynamic sitemap.xml with live platform routes
+│   │   └── sitemap.ts       # Dynamic sitemap.xml with platform + newsroom routes
 │   ├── components/
 │   │   ├── ArchitectureBlueprint.tsx   # Interactive 4-tier system blueprint
-│   │   ├── BentoGrid.tsx               # Strategic governance asymmetric grid
+│   │   ├── BentoGrid.tsx               # Strategic governance editorial ledger section
 │   │   ├── NetworkTopologyMatrix.tsx   # Real-time infrastructure telemetry matrix
 │   │   ├── NewsroomSection.tsx         # Public news & IR cards
+│   │   ├── PageHero.tsx                # Shared editorial page hero (all subpages)
 │   │   ├── PlatformCard.tsx            # Division card with division codes & metrics
+│   │   ├── SectionHeader.tsx           # Shared numbered section header
 │   │   ├── admin/                      # AdminShell and management components
 │   │   └── Header.tsx / Footer.tsx     # Corporate navigation with EN|KO switcher
 │   └── lib/
 │       ├── auth.ts          # Fail-closed JWT authentication & audit logging
 │       ├── data.ts          # High-performance cached database queries with fallbacks
 │       ├── default-data.ts  # Fallback & seed datasets for 6 divisions, hubs & news
+│       ├── division-icons.ts# Centralized division icon map (single source of truth)
+│       ├── email.ts         # SMTP inquiry notifications with logged fallback
 │       ├── i18n.tsx         # Bilingual dictionary and React LanguageContext
 │       ├── prisma.ts        # Prisma client proxy with database connectivity checks
+│       ├── rate-limit.ts    # In-memory rate limiter with bounded store
 │       └── version.ts       # Version and commit SHA resolution
+├── tests/                   # Regression tests (`npm test`, node:test + tsx)
+├── .github/workflows/ci.yml # CI: tests + lint + production build
+├── .env.example             # Documented environment template
 ├── wrangler.jsonc           # Cloudflare Workers configuration
 ├── next.config.ts           # Next.js configuration with security headers & git resolution
 └── package.json
@@ -148,7 +157,9 @@ npm run build
 - Local SQLite (`prisma/dev.db`) is strictly for local development and is **not persisted** across worker invocations.
 - If `DATABASE_URL` is omitted in production:
   - Public marketing pages render smoothly using default system constants (`src/lib/default-data.ts`).
-  - Contact inquiries (`/api/contact`) and Admin CRUD actions return `HTTP 500` rather than silently losing user data or creating phantom records.
+  - Contact inquiries (`/api/contact`) still accept submissions with a `demo-*` reference ID, attempt SMTP notification, and emit a `console.warn` so operators notice persistence is offline.
+  - Admin CRUD actions return `HTTP 500` rather than silently losing data or creating phantom records.
+  - Asset uploads fall back to inline Data URLs only for files under 512 KB; larger files are rejected with `HTTP 507` to avoid database bloat.
 
 ---
 
@@ -157,7 +168,7 @@ npm run build
 ### A. Health & Deployment Verification
 Verify that live edge worker reflects the latest deployment commit:
 ```bash
-# 1. Probe version endpoint
+# 1. Probe version endpoint (includes `database` health: connected/unreachable/unconfigured)
 curl -s https://company.dnjstjq0824.workers.dev/api/version
 
 # 2. Inspect response headers

@@ -37,5 +37,9 @@ prisma/*.db-journal
 
 # cloudflare opennext & wrangler
 .open-next/
+.open-next/
 .wrangler/
+
+# runtime user uploads (served from public/uploads, never committed)
+public/uploads/
 
