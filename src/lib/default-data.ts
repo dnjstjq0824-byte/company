@@ -461,7 +461,7 @@ export const DEFAULT_SITE_SETTINGS: Record<string, string> = {
   default_seo_description:
     "Official corporate portal of Booking Network Global Group — architecting the global digital backbone across cloud infrastructure, AI intelligence, B2B network mesh, and fintech trust architecture.",
   brand_logo: "/logos/booking-network.svg",
-  favicon: "/favicon.ico",
+  favicon: "/logos/booking-network.svg",
   cookie_consent_enabled: "true",
   default_locale: "en",
   global_announcement_enabled: "true",

@@ -1,19 +1,21 @@
 import type { MetadataRoute } from "next";
-import { getPublishedPlatforms, getAllSiteSettings } from "@/lib/data";
+import {
+  getPublishedPlatforms,
+  getPublishedNewsPosts,
+  getAllSiteSettings,
+} from "@/lib/data";
+import { siteBaseUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [platforms, settings] = await Promise.all([
+  const [platforms, newsPosts, settings] = await Promise.all([
     getPublishedPlatforms(),
+    getPublishedNewsPosts(),
     getAllSiteSettings(),
   ]);
 
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    settings.website_domain ||
-    "https://company.dnjstjq0824.workers.dev"
-  ).replace(/\/$/, "");
+  const baseUrl = siteBaseUrl(settings);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -41,6 +43,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     },
     {
+      url: `${baseUrl}/newsroom`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/privacy`,
       lastModified: new Date(),
       changeFrequency: "yearly",
@@ -61,6 +69,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
-  return [...staticRoutes, ...platformRoutes];
+  const newsRoutes: MetadataRoute.Sitemap = newsPosts.map((post) => ({
+    url: `${baseUrl}/newsroom/${post.slug}`,
+    lastModified: post.updated_at,
+    changeFrequency: "monthly",
+    priority: 0.75,
+  }));
+
+  return [...staticRoutes, ...platformRoutes, ...newsRoutes];
 }
 

@@ -22,7 +22,7 @@ model Platform {
   target_audience    String
   business_purpose   String   @default("")
   website_url        String?
-  platform_status    String   @default("Core Architecture") // Core Architecture | Live | R&D Phase | Expanding | In Development
+  platform_status    String   @default("Core Architecture") // Core Architecture | Live | Expanding | R&D Phase | Coming Soon | In Development | Temporarily Unavailable
   publication_status String   @default("Published")         // Published | Draft | Archived
   display_order      Int      @default(0)
   seo_title          String?

@@ -5,12 +5,25 @@ interface RateLimitRecord {
 
 const rateLimitStore = new Map<string, RateLimitRecord>();
 
+const MAX_STORE_SIZE = 5000;
+
+function purgeExpiredRecords(now: number) {
+  for (const [key, record] of rateLimitStore) {
+    if (now > record.resetAt) {
+      rateLimitStore.delete(key);
+    }
+  }
+}
+
 export function checkRateLimit(
   key: string,
   maxRequests: number,
   windowMs: number
 ): { allowed: boolean; remaining: number; retryAfterSeconds: number } {
   const now = Date.now();
+  if (rateLimitStore.size >= MAX_STORE_SIZE) {
+    purgeExpiredRecords(now);
+  }
   const record = rateLimitStore.get(key);
 
   if (!record || now > record.resetAt) {

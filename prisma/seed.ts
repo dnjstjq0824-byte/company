@@ -27,12 +27,31 @@ async function main() {
   }
 
   // 2. Seed or update 6 Core Business & Technology Divisions
+  // Upsert by slug so re-running the seed never wipes admin-managed content.
   console.log("-> Seeding 6 Core Business & Technology Divisions...");
-  // Clear any existing legacy platforms first to ensure 0 legacy records
-  await prisma.platform.deleteMany({});
   for (const div of DEFAULT_PLATFORMS) {
-    await prisma.platform.create({
-      data: {
+    await prisma.platform.upsert({
+      where: { slug: div.slug },
+      update: {
+        name: div.name,
+        division_code: div.division_code,
+        category: div.category,
+        icon_name: div.icon_name,
+        short_description: div.short_description,
+        full_description: div.full_description,
+        logo: div.logo,
+        features: JSON.stringify(div.features),
+        key_metrics: JSON.stringify(div.key_metrics),
+        target_audience: div.target_audience,
+        business_purpose: div.business_purpose,
+        website_url: div.website_url,
+        platform_status: div.platform_status,
+        publication_status: div.publication_status,
+        display_order: div.display_order,
+        seo_title: div.seo_title,
+        seo_description: div.seo_description,
+      },
+      create: {
         name: div.name,
         slug: div.slug,
         division_code: div.division_code,
@@ -55,12 +74,25 @@ async function main() {
     });
   }
 
-  // 3. Seed News Posts
+  // 3. Seed News Posts (upsert by slug; never delete admin-managed posts)
   console.log("-> Seeding Newsroom & IR Posts...");
-  await prisma.newsPost.deleteMany({});
   for (const post of DEFAULT_NEWS_POSTS) {
-    await prisma.newsPost.create({
-      data: {
+    await prisma.newsPost.upsert({
+      where: { slug: post.slug },
+      update: {
+        title: post.title,
+        category: post.category,
+        summary: post.summary,
+        content: post.content,
+        thumbnail_url: post.thumbnail_url,
+        is_featured: post.is_featured,
+        publication_status: post.publication_status,
+        published_at: new Date(post.published_at),
+        author_name: post.author_name,
+        seo_title: post.seo_title,
+        seo_description: post.seo_description,
+      },
+      create: {
         title: post.title,
         slug: post.slug,
         category: post.category,
@@ -77,23 +109,40 @@ async function main() {
     });
   }
 
-  // 4. Seed Global Hubs
+  // 4. Seed Global Hubs (match by city+country to avoid duplicates)
   console.log("-> Seeding Global Network Hubs...");
-  await prisma.globalHub.deleteMany({});
   for (const hub of DEFAULT_GLOBAL_HUBS) {
-    await prisma.globalHub.create({
-      data: {
-        region: hub.region,
-        city: hub.city,
-        country: hub.country,
-        hub_type: hub.hub_type,
-        description: hub.description,
-        address: hub.address,
-        contact_email: hub.contact_email,
-        status: hub.status,
-        display_order: hub.display_order,
-      },
+    const existing = await prisma.globalHub.findFirst({
+      where: { city: hub.city, country: hub.country },
     });
+    if (existing) {
+      await prisma.globalHub.update({
+        where: { id: existing.id },
+        data: {
+          region: hub.region,
+          hub_type: hub.hub_type,
+          description: hub.description,
+          address: hub.address,
+          contact_email: hub.contact_email,
+          status: hub.status,
+          display_order: hub.display_order,
+        },
+      });
+    } else {
+      await prisma.globalHub.create({
+        data: {
+          region: hub.region,
+          city: hub.city,
+          country: hub.country,
+          hub_type: hub.hub_type,
+          description: hub.description,
+          address: hub.address,
+          contact_email: hub.contact_email,
+          status: hub.status,
+          display_order: hub.display_order,
+        },
+      });
+    }
   }
 
   // 5. Seed Content Pages

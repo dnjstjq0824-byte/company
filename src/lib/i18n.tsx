@@ -6,12 +6,46 @@ export type Locale = "en" | "ko";
 
 interface Translations {
   nav: {
+    home: string;
     overview: string;
     divisions: string;
     network: string;
     newsroom: string;
     contact: string;
     admin: string;
+  };
+  filters: {
+    all: string;
+    pressRelease: string;
+    irGovernance: string;
+    technology: string;
+    globalNotice: string;
+    allDivisions: string;
+    groupCoreInfra: string;
+    groupAiData: string;
+    groupB2bApi: string;
+    groupFintech: string;
+    groupIncubation: string;
+    groupEsg: string;
+    allStatuses: string;
+    statusCoreArch: string;
+    statusLive: string;
+    statusExpanding: string;
+    statusRnd: string;
+    statusComingSoon: string;
+    statusInDev: string;
+    statusUnavailable: string;
+  };
+  cookie: {
+    title: string;
+    lead: string;
+    privacyPolicy: string;
+    tail: string;
+    essentialOnly: string;
+    acceptAll: string;
+  };
+  footer: {
+    backboneStatus: string;
   };
   brand: {
     groupName: string;
@@ -52,12 +86,46 @@ interface Translations {
 const translations: Record<Locale, Translations> = {
   en: {
     nav: {
+      home: "Home",
       overview: "Group Overview",
       divisions: "Business & Technology",
       network: "Global Network",
       newsroom: "Newsroom & IR",
       contact: "Partnership & Contact",
       admin: "Admin",
+    },
+    filters: {
+      all: "All",
+      pressRelease: "Press Release",
+      irGovernance: "IR & Governance",
+      technology: "Technology",
+      globalNotice: "Global Notice",
+      allDivisions: "All Divisions",
+      groupCoreInfra: "Core Infrastructure",
+      groupAiData: "AI & Big Data",
+      groupB2bApi: "B2B Platform & API",
+      groupFintech: "FinTech & Cybersecurity",
+      groupIncubation: "Platform Incubation",
+      groupEsg: "ESG & Governance",
+      allStatuses: "All Operational Statuses",
+      statusCoreArch: "Core Architecture",
+      statusLive: "Live",
+      statusExpanding: "Expanding",
+      statusRnd: "R&D Phase",
+      statusComingSoon: "Coming Soon",
+      statusInDev: "In Development",
+      statusUnavailable: "Temporarily Unavailable",
+    },
+    cookie: {
+      title: "Privacy & Cookie Preferences",
+      lead: "Booking Network Global Group uses strictly necessary technical storage to remember your display and privacy preferences. Non-essential cookies remain disabled unless you explicitly opt in. Read our",
+      privacyPolicy: "Privacy Policy",
+      tail: "for details.",
+      essentialOnly: "Essential Only",
+      acceptAll: "Accept All",
+    },
+    footer: {
+      backboneStatus: "Backbone Status: 99.999% SLA Operational",
     },
     brand: {
       groupName: "Booking Network Global Group",
@@ -97,12 +165,46 @@ const translations: Record<Locale, Translations> = {
   },
   ko: {
     nav: {
+      home: "홈",
       overview: "그룹 소개",
       divisions: "핵심 사업·기술",
       network: "글로벌 네트워크",
       newsroom: "뉴스룸 & IR",
       contact: "제휴 & 문의",
       admin: "관리자",
+    },
+    filters: {
+      all: "전체 보기",
+      pressRelease: "보도자료",
+      irGovernance: "IR & 거버넌스",
+      technology: "기술",
+      globalNotice: "글로벌 공지",
+      allDivisions: "전체 부문",
+      groupCoreInfra: "핵심 인프라",
+      groupAiData: "AI & 빅데이터",
+      groupB2bApi: "B2B 플랫폼 & API",
+      groupFintech: "핀테크 & 사이버보안",
+      groupIncubation: "플랫폼 인큐베이션",
+      groupEsg: "ESG & 거버넌스",
+      allStatuses: "전체 운영 상태",
+      statusCoreArch: "핵심 아키텍처",
+      statusLive: "운영 중",
+      statusExpanding: "확장 중",
+      statusRnd: "R&D 단계",
+      statusComingSoon: "출시 예정",
+      statusInDev: "개발 중",
+      statusUnavailable: "일시 중단",
+    },
+    cookie: {
+      title: "개인정보 & 쿠키 설정",
+      lead: "부킹네트워크글로벌그룹은 표시 및 개인정보 설정을 기억하기 위해 필수 기술 저장소만 사용합니다. 명시적으로 동의하지 않는 한 비필수 쿠키는 비활성화됩니다. 자세한 내용은",
+      privacyPolicy: "개인정보 처리방침",
+      tail: "을 확인하세요.",
+      essentialOnly: "필수만 허용",
+      acceptAll: "전체 허용",
+    },
+    footer: {
+      backboneStatus: "백본 상태: 99.999% SLA 정상 운영 중",
     },
     brand: {
       groupName: "부킹네트워크글로벌그룹",
@@ -154,8 +256,14 @@ const LanguageContext = createContext<LanguageContextType>({
   t: translations.en,
 });
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+export function LanguageProvider({
+  children,
+  initialLocale = "en",
+}: {
+  children: React.ReactNode;
+  initialLocale?: Locale;
+}) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
     try {

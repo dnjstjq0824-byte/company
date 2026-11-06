@@ -28,6 +28,16 @@ async function verifyJwtEdge(token: string): Promise<boolean> {
     if (parts.length !== 3) return false;
     const [headerB64, payloadB64, signatureB64] = parts;
 
+    try {
+      const headerJson = new TextDecoder().decode(
+        base64UrlToUint8Array(headerB64)
+      );
+      const header = JSON.parse(headerJson);
+      if (header.alg !== "HS256") return false;
+    } catch {
+      return false;
+    }
+
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
       "raw",
