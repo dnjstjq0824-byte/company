@@ -30,17 +30,17 @@ export function PlatformCard({ platform }: { platform: ParsedPlatform }) {
   );
 
   return (
-    <article className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition-colors duration-300 hover:border-cobalt-500/50 hover:shadow-xl dark:border-white/10 dark:bg-obsidian-900/90 dark:hover:border-cyan-400/50">
+    <article className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-5 shadow-sm transition-colors duration-300 hover:border-cobalt-500/50 hover:shadow-xl dark:border-white/10 dark:bg-obsidian-900/90 dark:hover:border-cyan-400/50 sm:p-7">
       <div>
         {/* Top Header: Monogram/Icon + Division Code + Status */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3.5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3.5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-cobalt-50/60 p-2.5 text-cobalt-600 dark:border-white/10 dark:bg-white/10 dark:text-cyan-400 group-hover:scale-105 transition-transform duration-300">
               <IconComponent className="h-6 w-6" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="rounded-md bg-cobalt-50 px-2 py-0.5 text-[10px] font-mono font-bold text-cobalt-600 dark:bg-white/10 dark:text-cyan-400">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="shrink-0 rounded-md bg-cobalt-50 px-2 py-0.5 text-[10px] font-mono font-bold text-cobalt-600 dark:bg-white/10 dark:text-cyan-400">
                   {platform.division_code || "BNG-CORE"}
                 </span>
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">

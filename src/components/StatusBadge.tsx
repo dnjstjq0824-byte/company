@@ -61,7 +61,7 @@ export function StatusBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border ${colorClasses} ${sizeClasses} tracking-wide`}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-full border text-center ${colorClasses} ${sizeClasses} tracking-wide`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${dotClass}`} aria-hidden="true" />
       {label}
