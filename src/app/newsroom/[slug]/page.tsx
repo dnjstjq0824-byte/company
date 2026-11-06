@@ -5,9 +5,6 @@ import {
   ArrowLeft,
   Calendar,
   User,
-  Share2,
-  Tag,
-  ArrowRight,
   Sparkles,
 } from "lucide-react";
 import {
@@ -15,6 +12,8 @@ import {
   getPublishedNewsPosts,
   getAllSiteSettings,
 } from "@/lib/data";
+import { absoluteUrl } from "@/lib/seo";
+import { renderPolicyBody } from "@/components/PolicyRenderer";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +21,10 @@ export async function generateMetadata(context: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await context.params;
-  const post = await getPublishedNewsPostBySlug(slug);
+  const [post, settings] = await Promise.all([
+    getPublishedNewsPostBySlug(slug),
+    getAllSiteSettings(),
+  ]);
 
   if (!post) {
     return { title: "Article Not Found" };
@@ -32,123 +34,32 @@ export async function generateMetadata(context: {
     post.seo_title ||
     `${post.title} | Booking Network Global Group Newsroom`;
   const description = post.seo_description || post.summary;
+  const canonical = `/newsroom/${post.slug}`;
 
   return {
     title,
     description,
     alternates: {
-      canonical: `/newsroom/${post.slug}`,
+      canonical,
     },
     openGraph: {
       title,
       description,
       type: "article",
-      url: `/newsroom/${post.slug}`,
+      url: absoluteUrl(settings, canonical),
       publishedTime: post.published_at.toISOString(),
       authors: [post.author_name],
       images: post.thumbnail_url ? [{ url: post.thumbnail_url }] : undefined,
     },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 
-// Simple markdown renderer for article body
-function renderMarkdown(content: string) {
-  const lines = content.split("\n");
-  const elements: React.ReactNode[] = [];
-  let inList = false;
-  let listItems: string[] = [];
 
-  const flushList = (keyPrefix: string) => {
-    if (inList && listItems.length > 0) {
-      elements.push(
-        <ul key={`${keyPrefix}-list`} className="my-4 space-y-2 list-disc pl-6 text-slate-700 dark:text-slate-300">
-          {listItems.map((item, idx) => (
-            <li key={idx} className="leading-relaxed">
-              {renderInline(item)}
-            </li>
-          ))}
-        </ul>
-      );
-      listItems = [];
-      inList = false;
-    }
-  };
-
-  const renderInline = (text: string) => {
-    // Basic bold **text** and italic *text* and link [text](url)
-    const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|\[.*?\]\(.*?\))/g);
-    return parts.map((part, i) => {
-      if (part.startsWith("**") && part.endsWith("**")) {
-        return <strong key={i} className="font-bold text-slate-900 dark:text-white">{part.slice(2, -2)}</strong>;
-      }
-      if (part.startsWith("*") && part.endsWith("*")) {
-        return <em key={i} className="italic">{part.slice(1, -1)}</em>;
-      }
-      const linkMatch = part.match(/^\[(.*?)\]\((.*?)\)$/);
-      if (linkMatch) {
-        return (
-          <a
-            key={i}
-            href={linkMatch[2]}
-            className="text-cobalt-600 dark:text-cyan-400 underline hover:opacity-80"
-          >
-            {linkMatch[1]}
-          </a>
-        );
-      }
-      return part;
-    });
-  };
-
-  lines.forEach((line, index) => {
-    const trimmed = line.trim();
-
-    if (trimmed.startsWith("- ") || trimmed.startsWith("* ") || /^\d+\.\s/.test(trimmed)) {
-      inList = true;
-      listItems.push(trimmed.replace(/^[-*]\s+|\d+\.\s+/, ""));
-      return;
-    } else {
-      flushList(`flush-${index}`);
-    }
-
-    if (trimmed.startsWith("### ")) {
-      elements.push(
-        <h3 key={index} className="mt-8 mb-3 text-xl font-extrabold text-slate-900 dark:text-white">
-          {renderInline(trimmed.slice(4))}
-        </h3>
-      );
-    } else if (trimmed.startsWith("## ")) {
-      elements.push(
-        <h2 key={index} className="mt-10 mb-4 text-2xl font-extrabold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-white/10">
-          {renderInline(trimmed.slice(3))}
-        </h2>
-      );
-    } else if (trimmed.startsWith("# ")) {
-      elements.push(
-        <h1 key={index} className="mt-12 mb-6 text-3xl font-extrabold text-slate-900 dark:text-white">
-          {renderInline(trimmed.slice(2))}
-        </h1>
-      );
-    } else if (trimmed.startsWith("> ")) {
-      elements.push(
-        <blockquote key={index} className="my-6 border-l-4 border-cobalt-600 pl-4 italic text-slate-700 dark:text-slate-300 py-1 bg-slate-50 dark:bg-white/5 rounded-r-xl">
-          {renderInline(trimmed.slice(2))}
-        </blockquote>
-      );
-    } else if (trimmed === "") {
-      // blank line
-    } else {
-      elements.push(
-        <p key={index} className="my-4 text-base leading-relaxed text-slate-700 dark:text-slate-300">
-          {renderInline(trimmed)}
-        </p>
-      );
-    }
-  });
-
-  flushList("end");
-  return elements;
-}
 
 export default async function NewsDetailPage(context: {
   params: Promise<{ slug: string }>;
@@ -165,6 +76,10 @@ export default async function NewsDetailPage(context: {
   }
 
   const related = allPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const pressEmail =
+    settings.pr_email?.trim() ||
+    settings.corporate_email?.trim() ||
+    "press@bookingnetwork.com";
 
   return (
     <article className="bg-white dark:bg-obsidian-950 transition-colors py-16">
@@ -210,14 +125,14 @@ export default async function NewsDetailPage(context: {
 
           <div className="mt-6 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-obsidian-900/80">
             <p className="text-base sm:text-lg italic text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-              "{post.summary}"
+              &quot;{post.summary}&quot;
             </p>
           </div>
         </div>
 
         {/* Article Body */}
-        <div className="py-10 prose-headings:font-extrabold">
-          {renderMarkdown(post.content)}
+        <div className="py-10">
+          {renderPolicyBody(post.content)}
         </div>
 
         {/* Official Disclaimers */}
@@ -225,7 +140,14 @@ export default async function NewsDetailPage(context: {
           <p className="font-bold text-slate-700 dark:text-slate-300 mb-1">
             Official Corporate Notice
           </p>
-          This document is published by Booking Network Global Group for informational and official disclosure purposes. For institutional inquiries or media reproduction authorizations, contact \`press@bookingnetwork.com\`.
+          This document is published by Booking Network Global Group for informational and official disclosure purposes. For institutional inquiries or media reproduction authorizations, contact{" "}
+          <a
+            href={`mailto:${pressEmail}`}
+            className="font-semibold text-cobalt-600 hover:underline dark:text-cyan-400"
+          >
+            {pressEmail}
+          </a>
+          .
         </div>
 
         {/* Related Articles */}

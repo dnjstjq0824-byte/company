@@ -1,16 +1,12 @@
 "use client";
 
 import {
-  Globe,
   Cloud,
   Cpu,
   Network,
   ShieldCheck,
-  Server,
-  Layers,
   ArrowDown,
   Building2,
-  Lock,
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
@@ -45,7 +41,7 @@ export function ArchitectureBlueprint() {
           {/* Level 1: Global HQ & Tech Holding */}
           <div className="rounded-3xl border-2 border-cobalt-500/50 bg-gradient-to-r from-obsidian-900 via-obsidian-850 to-obsidian-900 p-6 sm:p-8 shadow-xl shadow-cobalt-500/10 text-center relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-cobalt-600 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-              Tier 01 • Strategic Tech Holding
+              {locale === "ko" ? "계층 01 • 전략적 기술 지주" : "Tier 01 • Strategic Tech Holding"}
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -65,10 +61,10 @@ export function ArchitectureBlueprint() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold text-cyan-300 border border-white/10">
-                  Executive Committee
+                  {locale === "ko" ? "경영위원회" : "Executive Committee"}
                 </span>
                 <span className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold text-cyan-300 border border-white/10">
-                  Tech Advisory Board
+                  {locale === "ko" ? "기술자문위원회" : "Tech Advisory Board"}
                 </span>
               </div>
             </div>
@@ -83,7 +79,7 @@ export function ArchitectureBlueprint() {
           {/* Level 2: Core Cloud, Edge & AI Layer */}
           <div className="rounded-3xl border border-white/15 bg-obsidian-900/80 p-6 sm:p-7 shadow-lg relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-800 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-400 border border-white/10">
-              Tier 02 • Core Infrastructure & Data Intelligence
+              {locale === "ko" ? "계층 02 • 핵심 인프라 & 데이터 인텔리전스" : "Tier 02 • Core Infrastructure & Data Intelligence"}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-start gap-3">
@@ -91,7 +87,7 @@ export function ArchitectureBlueprint() {
                   <Cloud className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Global Cloud & Distributed Infrastructure</h4>
+                  <h4 className="text-sm font-bold text-white">{locale === "ko" ? "글로벌 클라우드 & 분산 인프라" : "Global Cloud & Distributed Infrastructure"}</h4>
                   <p className="text-xs text-slate-400 mt-1">
                     Multi-Region Anycast Edge POPs • SDN Mesh • 99.999% SLA Carrier Core
                   </p>
@@ -103,7 +99,7 @@ export function ArchitectureBlueprint() {
                   <Cpu className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">AI & Data Intelligence Engine</h4>
+                  <h4 className="text-sm font-bold text-white">{locale === "ko" ? "AI & 데이터 인텔리전스 엔진" : "AI & Data Intelligence Engine"}</h4>
                   <p className="text-xs text-slate-400 mt-1">
                     12M+ Events/sec Streaming ETL • Sub-8ms Vector Search • Predictive Telemetry
                   </p>
@@ -120,16 +116,16 @@ export function ArchitectureBlueprint() {
 
           {/* Level 3: B2B API Mesh & Security Trust Mesh */}
           <div className="rounded-3xl border border-white/15 bg-obsidian-900/80 p-6 sm:p-7 shadow-lg relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-800 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-400 border border-white/10">
-              Tier 03 • Interoperability & Zero-Trust Governance
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-800 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-400 border border-white/10">
+              {locale === "ko" ? "계층 03 • 상호운용성 & 제로트러스트 거버넌스" : "Tier 03 • Interoperability & Zero-Trust Governance"}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/20 text-sky-400">
                   <Network className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Global B2B Network & API Mesh</h4>
+                  <h4 className="text-sm font-bold text-white">{locale === "ko" ? "글로벌 B2B 네트워크 & API 메시" : "Global B2B Network & API Mesh"}</h4>
                   <p className="text-xs text-slate-400 mt-1">
                     2.8B+ Daily Calls • Unified GraphQL/gRPC Gateway • 1,400+ Enterprise Connects
                   </p>
@@ -141,7 +137,7 @@ export function ArchitectureBlueprint() {
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Enterprise FinTech & Trust Architecture</h4>
+                  <h4 className="text-sm font-bold text-white">{locale === "ko" ? "엔터프라이즈 핀테크 & 신뢰 아키텍처" : "Enterprise FinTech & Trust Architecture"}</h4>
                   <p className="text-xs text-slate-400 mt-1">
                     Zero-Trust Cryptographic Ledger • PCI-DSS L1 • SOC 2 Type II Certified
                   </p>
@@ -159,24 +155,24 @@ export function ArchitectureBlueprint() {
           {/* Level 4: Regional Operations Hubs & Ecosystem Scale */}
           <div className="rounded-3xl border border-white/15 bg-obsidian-900/90 p-6 sm:p-7 shadow-lg relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-800 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 border border-white/10">
-              Tier 04 • Global Regional Operations & Edge Ingress
+              {locale === "ko" ? "계층 04 • 글로벌 지역 운영 & 엣지 인그레스" : "Tier 04 • Global Regional Operations & Edge Ingress"}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
               <div className="rounded-xl border border-white/10 bg-white/5 p-3.5">
                 <span className="block text-xs font-extrabold text-white">Seoul, KR</span>
-                <span className="block text-[11px] text-cyan-400 mt-0.5">APAC Global HQ</span>
+                <span className="block text-[11px] text-cyan-400 mt-0.5">{locale === "ko" ? "APAC 글로벌 본사" : "APAC Global HQ"}</span>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/5 p-3.5">
                 <span className="block text-xs font-extrabold text-white">San Jose, US</span>
-                <span className="block text-[11px] text-cyan-400 mt-0.5">North America R&D</span>
+                <span className="block text-[11px] text-cyan-400 mt-0.5">{locale === "ko" ? "북미 R&D" : "North America R&D"}</span>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/5 p-3.5">
                 <span className="block text-xs font-extrabold text-white">Frankfurt, DE</span>
-                <span className="block text-[11px] text-cyan-400 mt-0.5">Europe Regulatory Hub</span>
+                <span className="block text-[11px] text-cyan-400 mt-0.5">{locale === "ko" ? "유럽 규제 허브" : "Europe Regulatory Hub"}</span>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/5 p-3.5">
                 <span className="block text-xs font-extrabold text-white">Dubai, UAE</span>
-                <span className="block text-[11px] text-cyan-400 mt-0.5">MENA Digital Node</span>
+                <span className="block text-[11px] text-cyan-400 mt-0.5">{locale === "ko" ? "MENA 디지털 노드" : "MENA Digital Node"}</span>
               </div>
             </div>
           </div>

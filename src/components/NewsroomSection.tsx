@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Calendar, Tag, ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowRight, Calendar, Sparkles } from "lucide-react";
 import { ParsedNewsPost } from "@/lib/data";
 import { useLanguage } from "@/lib/i18n";
+import { SectionHeader } from "./SectionHeader";
 
 export function NewsroomSection({ posts }: { posts: ParsedNewsPost[] }) {
   const { locale, t } = useLanguage();
@@ -18,27 +19,14 @@ export function NewsroomSection({ posts }: { posts: ParsedNewsPost[] }) {
   return (
     <section className="py-20 bg-white dark:bg-obsidian-950 transition-colors">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/20 bg-cobalt-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cobalt-600 dark:text-cyan-400">
-              Newsroom & IR Disclosures
-            </div>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-              {t.common.latestNewsHeading}
-            </h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              {t.common.latestNewsSubtitle}
-            </p>
-          </div>
-          <Link
-            href="/newsroom"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-cobalt-600 hover:text-cobalt-700 dark:text-cyan-400 dark:hover:text-cyan-300"
-          >
-            <span>{t.actions.viewAll}</span>
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        </div>
+        <SectionHeader
+          index="04"
+          eyebrow="Newsroom & IR Disclosures"
+          title={t.common.latestNewsHeading}
+          description={t.common.latestNewsSubtitle}
+          linkHref="/newsroom"
+          linkLabel={t.actions.viewAll}
+        />
 
         {/* 2-Column Editorial Grid */}
         <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8">

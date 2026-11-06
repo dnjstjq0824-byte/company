@@ -20,6 +20,7 @@ interface LayerInfo {
   icon: typeof Cloud;
   metric: string;
   status: string;
+  statusKr: string;
   description: string;
   descriptionKr: string;
   color: string;
@@ -33,6 +34,7 @@ const LAYERS: LayerInfo[] = [
     icon: Cloud,
     metric: "45+ POPs • <15ms",
     status: "99.999% SLA Operational",
+    statusKr: "99.999% SLA 정상 운영",
     description: "Distributed Multi-Region Anycast Edge Nodes with autonomous BGP route healing.",
     descriptionKr: "자율 BGP 라우팅 힐링을 갖춘 전 세계 45개 이상 멀티리전 애니캐스트 엣지 노드입니다.",
     color: "from-blue-500 to-cyan-400",
@@ -44,6 +46,7 @@ const LAYERS: LayerInfo[] = [
     icon: Cpu,
     metric: "12M ev/s • <8ms",
     status: "Active Vector Ingestion",
+    statusKr: "벡터 인제스트 활성",
     description: "Sub-millisecond semantic search, cross-border matching, and automated predictive telemetry.",
     descriptionKr: "마이크로초 시맨틱 검색, 크로스보더 매칭 및 자동화된 예측 텔레메트리를 처리합니다.",
     color: "from-cyan-400 to-teal-400",
@@ -55,9 +58,10 @@ const LAYERS: LayerInfo[] = [
     icon: Network,
     metric: "2.8B calls/day",
     status: "1,400+ Enterprise Partners",
+    statusKr: "1,400개 이상 기업 파트너",
     description: "Unified GraphQL & gRPC interconnect protocol enabling real-time global trade interoperability.",
     descriptionKr: "실시간 글로벌 무역 상호운용성을 제공하는 통합 GraphQL 및 gRPC 인터커넥트 메시입니다.",
-    color: "from-indigo-500 to-purple-400",
+    color: "from-sky-500 to-cyan-400",
   },
   {
     id: "trust",
@@ -66,6 +70,7 @@ const LAYERS: LayerInfo[] = [
     icon: ShieldCheck,
     metric: "SOC 2 • PCI-DSS L1",
     status: "100% End-to-End Cryptography",
+    statusKr: "100% 종단간 암호화",
     description: "Hardware HSM key isolation, zero-knowledge verification, and continuous policy audit.",
     descriptionKr: "하드웨어 HSM 키 격리, 영지식 증명 검증 및 연속적인 감사 추적 거버넌스를 실행합니다.",
     color: "from-emerald-400 to-cyan-400",
@@ -73,10 +78,10 @@ const LAYERS: LayerInfo[] = [
 ];
 
 const NODES = [
-  { city: "Seoul", label: "Global HQ", ping: "8ms", status: "Nominal", top: "34%", left: "78%" },
-  { city: "San Jose", label: "US R&D", ping: "14ms", status: "Nominal", top: "38%", left: "20%" },
-  { city: "Frankfurt", label: "EU Hub", ping: "22ms", status: "Nominal", top: "30%", left: "50%" },
-  { city: "Dubai", label: "MENA Node", ping: "31ms", status: "Nominal", top: "48%", left: "62%" },
+  { city: "Seoul", label: "Global HQ", labelKr: "글로벌 본사", ping: "8ms", top: "34%", left: "78%" },
+  { city: "San Jose", label: "US R&D", labelKr: "미국 R&D", ping: "14ms", top: "38%", left: "20%" },
+  { city: "Frankfurt", label: "EU Hub", labelKr: "유럽 허브", ping: "22ms", top: "30%", left: "50%" },
+  { city: "Dubai", label: "MENA Node", labelKr: "MENA 노드", ping: "31ms", top: "48%", left: "62%" },
 ];
 
 export function NetworkTopologyMatrix() {
@@ -114,12 +119,12 @@ export function NetworkTopologyMatrix() {
           <div className="hidden sm:flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 border border-white/10">
             <Server className="h-3.5 w-3.5 text-cyan-400" />
             <span className="text-white font-bold">45</span>
-            <span className="text-slate-400">Edge POPs</span>
+            <span className="text-slate-400">{locale === "ko" ? "엣지 POP" : "Edge POPs"}</span>
           </div>
           <div className="flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 border border-white/10">
             <Zap className="h-3.5 w-3.5 text-cobalt-400" />
             <span className="text-white font-bold">&lt;15ms</span>
-            <span className="text-slate-400">Latency</span>
+            <span className="text-slate-400">{locale === "ko" ? "지연율" : "Latency"}</span>
           </div>
         </div>
       </div>
@@ -219,7 +224,7 @@ export function NetworkTopologyMatrix() {
                 {node.city}
               </span>
               <span className="block text-[9px] font-mono text-cyan-400 tabular-nums">
-                {node.label} • {node.ping}
+                {locale === "ko" ? node.labelKr : node.label} • {node.ping}
               </span>
             </div>
           </div>
@@ -237,7 +242,7 @@ export function NetworkTopologyMatrix() {
               </span>
               <span className="text-[10px] font-semibold text-emerald-400 flex items-center gap-1">
                 <CheckCircle2 className="h-3 w-3" />
-                {currentLayer.status}
+                {locale === "ko" ? currentLayer.statusKr : currentLayer.status}
               </span>
             </div>
           </div>

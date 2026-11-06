@@ -150,6 +150,24 @@ export function renderPolicyBody(text: string): React.ReactNode[] {
       continue;
     }
 
+    if (/^\d+\.\s/.test(line)) {
+      const orderedItems: string[] = [];
+      while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
+        orderedItems.push(lines[i].trim().replace(/^\d+\.\s+/, ""));
+        i++;
+      }
+      elements.push(
+        <ol key={`ol-${i}`} className="my-4 list-decimal pl-5 space-y-2 text-sm text-slate-700 dark:text-slate-300">
+          {orderedItems.map((item, idx) => (
+            <li key={idx} className="leading-relaxed">
+              {renderInline(item)}
+            </li>
+          ))}
+        </ol>
+      );
+      continue;
+    }
+
     if (line.startsWith("> ")) {
       elements.push(
         <blockquote

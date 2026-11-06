@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { getAllSiteSettings, getPublishedPlatforms } from "@/lib/data";
+import { siteBaseUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CookieBanner } from "@/components/CookieBanner";
@@ -29,11 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     settings.default_seo_description ||
     "Official corporate portal of Booking Network Global Group — architecting the global digital backbone across cloud infrastructure, AI intelligence, B2B network mesh, and fintech trust architecture.";
 
-  const baseUrl = (
-    settings.website_domain ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://bookingnetwork.com"
-  ).replace(/\/$/, "");
+  const baseUrl = siteBaseUrl(settings);
 
   return {
     metadataBase: new URL(baseUrl),
@@ -82,11 +80,7 @@ export default async function RootLayout({
   ]);
 
   const companyName = settings.company_name || "Booking Network Global Group";
-  const baseUrl = (
-    settings.website_domain ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://bookingnetwork.com"
-  ).replace(/\/$/, "");
+  const baseUrl = siteBaseUrl(settings);
 
   const socialUrls = [
     settings.social_linkedin,
@@ -125,14 +119,23 @@ export default async function RootLayout({
     link: settings.global_announcement_link || "/newsroom",
   };
 
+  const cookieStore = await cookies();
+  const savedLocale = cookieStore.get("bng_locale")?.value;
+  const initialLocale: "en" | "ko" =
+    savedLocale === "ko" || savedLocale === "en"
+      ? savedLocale
+      : settings.default_locale === "ko"
+        ? "ko"
+        : "en";
+
   return (
     <html
-      lang="en"
+      lang={initialLocale}
       className={`${inter.variable} ${plusJakarta.variable}`}
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col font-sans bg-white dark:bg-obsidian-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-cobalt-600 selection:text-white transition-colors duration-200">
-        <LanguageProvider>
+        <LanguageProvider initialLocale={initialLocale}>
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-cobalt-600 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"

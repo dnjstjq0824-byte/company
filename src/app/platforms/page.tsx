@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Layers, ArrowRight, Sparkles } from "lucide-react";
+import { cookies } from "next/headers";
+import { ArrowRight } from "lucide-react";
 import { getPublishedPlatforms, getAllSiteSettings } from "@/lib/data";
 import { PlatformFilterGrid } from "@/components/PlatformFilterGrid";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +13,19 @@ export const metadata: Metadata = {
   description:
     "Explore the 6 core business and technology divisions architected, governed, and scaled by Booking Network Global Group across cloud infrastructure, AI intelligence, B2B mesh, and fintech trust.",
   alternates: { canonical: "/platforms" },
+  openGraph: {
+    title: "Business & Technology Divisions | Booking Network Global Group",
+    description:
+      "Explore the 6 core business and technology divisions architected, governed, and scaled by Booking Network Global Group across cloud infrastructure, AI intelligence, B2B mesh, and fintech trust.",
+    type: "website",
+    url: "/platforms",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Business & Technology Divisions | Booking Network Global Group",
+    description:
+      "Explore the 6 core business and technology divisions architected, governed, and scaled by Booking Network Global Group across cloud infrastructure, AI intelligence, B2B mesh, and fintech trust.",
+  },
 };
 
 export default async function PlatformsDirectoryPage() {
@@ -20,28 +35,20 @@ export default async function PlatformsDirectoryPage() {
   ]);
 
   const companyName = settings.company_name || "Booking Network Global Group";
+  const isKo = (await cookies()).get("bng_locale")?.value === "ko";
 
   return (
     <div className="bg-white dark:bg-obsidian-950 transition-colors">
-      {/* Header Banner */}
-      <section className="bg-obsidian-950 py-16 text-white sm:py-24 border-b border-white/10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-cobalt-500/10 rounded-full blur-[140px] pointer-events-none" />
-
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-400">
-              <Sparkles className="h-3.5 w-3.5" />
-              Core Technology & Business Divisions
-            </span>
-            <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              Global IT Platform Divisions & Core Architecture
-            </h1>
-            <p className="mt-4 text-base sm:text-lg leading-relaxed text-slate-300">
-              {companyName} architects and governs the sovereign digital foundation powering modern enterprise ecosystems—spanning distributed cloud edge backbones, streaming AI intelligence, cross-border API mesh networks, and zero-trust cybersecurity protocols.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        index="02"
+        eyebrow={isKo ? "핵심 기술 & 사업 부문" : "Core Technology & Business Divisions"}
+        title={isKo ? "글로벌 IT 플랫폼 부문 & 핵심 아키텍처" : "Global IT Platform Divisions & Core Architecture"}
+        description={
+          isKo
+            ? `${companyName}는 현대 엔터프라이즈 생태계를 뒷받침하는 주권 디지털 기반을 설계하고 거버넌스합니다. 분산 클라우드 엣지 백본, 스트리밍 AI 인텔리전스, 크로스보더 API 메시 네트워크, 제로트러스트 사이버보안 프로토콜을 아우릅니다.`
+            : `${companyName} architects and governs the sovereign digital foundation powering modern enterprise ecosystems—spanning distributed cloud edge backbones, streaming AI intelligence, cross-border API mesh networks, and zero-trust cybersecurity protocols.`
+        }
+      />
 
       {/* Directory Content */}
       <section className="py-16 sm:py-20">

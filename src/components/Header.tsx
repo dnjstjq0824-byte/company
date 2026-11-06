@@ -9,37 +9,12 @@ import {
   X,
   ArrowUpRight,
   Globe,
-  Cloud,
-  Cpu,
-  Network,
-  ShieldCheck,
-  Boxes,
-  Layers,
   Sparkles,
-  ExternalLink,
 } from "lucide-react";
 import { ParsedPlatform } from "@/lib/data";
+import { getDivisionIcon } from "@/lib/division-icons";
 import { ThemeToggle } from "./ThemeToggle";
 import { useLanguage } from "@/lib/i18n";
-
-function getDivisionIcon(iconName: string) {
-  switch (iconName) {
-    case "Cloud":
-      return Cloud;
-    case "Cpu":
-      return Cpu;
-    case "Network":
-      return Network;
-    case "ShieldCheck":
-      return ShieldCheck;
-    case "Boxes":
-      return Boxes;
-    case "Globe":
-      return Globe;
-    default:
-      return Layers;
-  }
-}
 
 export function Header({
   companyName,
@@ -72,7 +47,7 @@ export function Header({
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-obsidian-950/95 transition-colors">
       {/* Optional Global Announcement Bar */}
       {announcement?.enabled && announcement.text && (
-        <div className="bg-gradient-to-r from-cobalt-600 via-indigo-600 to-cyan-600 px-4 py-1.5 text-center text-xs font-medium text-white shadow-inner">
+        <div className="bg-gradient-to-r from-cobalt-700 via-cobalt-600 to-cyan-600 px-4 py-1.5 text-center text-xs font-medium text-white shadow-inner">
           <Link
             href={announcement.link || "/newsroom"}
             className="inline-flex items-center gap-1.5 hover:underline"
@@ -134,9 +109,17 @@ export function Header({
             className="relative"
             onMouseEnter={() => setMegaMenuOpen(true)}
             onMouseLeave={() => setMegaMenuOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setMegaMenuOpen(false);
+              }
+            }}
           >
             <Link
               href="/platforms"
+              aria-expanded={megaMenuOpen}
+              aria-haspopup="true"
+              onFocus={() => setMegaMenuOpen(true)}
               className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 pathname.startsWith("/platforms")
                   ? "bg-slate-100 text-cobalt-600 dark:bg-white/10 dark:text-cyan-400 font-semibold"
@@ -152,7 +135,7 @@ export function Header({
             </Link>
 
             {megaMenuOpen && (
-              <div className="absolute left-1/2 -translate-x-1/2 top-full w-[640px] pt-2 animate-in fade-in slide-in-from-top-2 duration-150 z-50">
+              <div className="absolute left-1/2 -translate-x-1/2 top-full w-[640px] max-w-[calc(100vw-2rem)] pt-2 animate-in fade-in slide-in-from-top-2 duration-150 z-50">
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-white/10 dark:bg-obsidian-900">
                   <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-white/10">
                     <div>
@@ -295,7 +278,7 @@ export function Header({
               href="/"
               className="block rounded-lg px-3 py-2 text-base font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5"
             >
-              Home
+              {t.nav.home}
             </Link>
             <Link
               href="/about"

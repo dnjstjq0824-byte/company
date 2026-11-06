@@ -2,19 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   ArrowRight,
-  ShieldCheck,
-  Globe2,
-  Server,
-  Zap,
   ArrowUpRight,
   Building2,
-  Sparkles,
-  ExternalLink,
 } from "lucide-react";
 import {
   getPublishedPlatforms,
   getContentPageBySlug,
-  getAllSiteSettings,
   getPublishedNewsPosts,
 } from "@/lib/data";
 import { PlatformFilterGrid } from "@/components/PlatformFilterGrid";
@@ -22,6 +15,7 @@ import { NetworkTopologyMatrix } from "@/components/NetworkTopologyMatrix";
 import { BentoGrid } from "@/components/BentoGrid";
 import { ArchitectureBlueprint } from "@/components/ArchitectureBlueprint";
 import { NewsroomSection } from "@/components/NewsroomSection";
+import { SectionHeader } from "@/components/SectionHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -34,8 +28,6 @@ interface HomeContent {
   hero_secondary_cta_text?: string;
   hero_secondary_cta_link?: string;
   hero_metrics?: Array<{ label: string; value: string }>;
-  about_heading?: string;
-  about_body?: string;
   ecosystem_heading?: string;
   ecosystem_subtitle?: string;
   partnership_headline?: string;
@@ -46,30 +38,29 @@ interface HomeContent {
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getContentPageBySlug<HomeContent>("home");
+  const title =
+    page?.seo_metadata?.title ||
+    "Booking Network Global Group — Architecting the Global Digital Backbone";
+  const description =
+    page?.seo_metadata?.description ||
+    "Official corporate portal of Booking Network Global Group. Architecting enterprise digital infrastructure, AI intelligence, and connected global platforms.";
   return {
-    title:
-      page?.seo_metadata?.title ||
-      "Booking Network Global Group — Architecting the Global Digital Backbone",
-    description:
-      page?.seo_metadata?.description ||
-      "Official corporate portal of Booking Network Global Group. Architecting enterprise digital infrastructure, AI intelligence, and connected global platforms.",
+    title,
+    description,
     alternates: { canonical: "/" },
+    openGraph: { title, description, type: "website", url: "/" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
 export default async function HomePage() {
-  const [platforms, newsPosts, pageData, settings] = await Promise.all([
+  const [platforms, newsPosts, pageData] = await Promise.all([
     getPublishedPlatforms(),
     getPublishedNewsPosts(4),
     getContentPageBySlug<HomeContent>("home"),
-    getAllSiteSettings(),
   ]);
 
   const content = pageData?.content || {};
-  const companyName = settings.company_name || "Booking Network Global Group";
-  const tagline =
-    settings.tagline ||
-    "Architecting the Global Digital Backbone. Connecting Next-Generation Platforms.";
 
   const heroMetrics = content.hero_metrics || [
     { label: "Core Tech Divisions", value: "6 Pillars" },
@@ -86,34 +77,36 @@ export default async function HomePage() {
       <section className="relative overflow-hidden bg-white pt-12 pb-20 dark:bg-obsidian-950 transition-colors">
         {/* Subtle mesh background */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-cobalt-500/10 dark:bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-center">
             {/* Left Hero Copy */}
             <div className="lg:col-span-6 max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/30 bg-cobalt-500/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-cobalt-600 dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-400">
-                <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-                <span>
-                  {content.hero_badge ||
-                    "BOOKING NETWORK GLOBAL GROUP • GLOBAL IT PLATFORM HOLDING"}
+              <div className="flex items-center gap-4">
+                <span className="font-mono text-xs font-bold tabular-nums text-cobalt-600 dark:text-cyan-400">
+                  BNGG — 00
+                </span>
+                <span aria-hidden="true" className="h-px w-12 bg-cobalt-500/50" />
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  {content.hero_badge || "Global IT Platform Holding"}
                 </span>
               </div>
 
-              <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+              <h1 className="mt-5 font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.05]">
                 {content.hero_headline || "Architecting the Global Digital Backbone."}
               </h1>
 
-              <p className="mt-6 text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+              <p className="mt-6 max-w-xl text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                 {content.hero_supporting_text ||
                   "Booking Network Global Group architects, governs, and scales mission-critical digital infrastructure, intelligent data engines, and cross-border platform ecosystems connecting global enterprise markets."}
               </p>
 
               {/* Hero Action CTAs */}
-              <div className="mt-8 flex flex-wrap items-center gap-4">
+              <div className="mt-8 flex flex-wrap items-center gap-6">
                 <Link
                   href={content.hero_primary_cta_link || "/platforms"}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-cobalt-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-cobalt-600/25 hover:bg-cobalt-500 transition-all hover:scale-[1.02]"
+                  className="inline-flex items-center gap-2 rounded-full bg-cobalt-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-cobalt-600/25 hover:bg-cobalt-500 transition-colors"
                 >
                   <span>{content.hero_primary_cta_text || "Explore Core Divisions"}</span>
                   <ArrowRight className="h-4 w-4" />
@@ -121,7 +114,7 @@ export default async function HomePage() {
 
                 <Link
                   href={content.hero_secondary_cta_link || "/contact"}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white/80 px-6 py-3.5 text-sm font-bold text-slate-800 hover:bg-slate-100 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-800 underline decoration-cobalt-500/40 decoration-2 underline-offset-4 hover:decoration-cobalt-500 dark:text-white dark:decoration-cyan-400/40 dark:hover:decoration-cyan-400 transition-colors"
                 >
                   <span>{content.hero_secondary_cta_text || "Global Partnerships & IR"}</span>
                   <ArrowUpRight className="h-4 w-4" />
@@ -143,15 +136,15 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Executive Key Metrics Bar */}
-          <div className="mt-16 rounded-3xl border border-slate-200/90 bg-slate-50/70 p-6 sm:p-8 dark:border-white/10 dark:bg-obsidian-900/70 shadow-sm backdrop-blur-xl">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-white/10">
+          {/* Executive Key Metrics Ledger */}
+          <div className="mt-16 border-t-2 border-slate-900 pt-6 dark:border-white">
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
               {heroMetrics.map((metric, idx) => (
-                <div key={idx} className={idx !== 0 ? "pt-4 sm:pt-0 sm:pl-6" : ""}>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight">
+                <div key={idx}>
+                  <span className="block font-mono text-2xl font-extrabold tabular-nums tracking-tight text-slate-900 dark:text-white sm:text-3xl">
                     {metric.value}
                   </span>
-                  <span className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">
+                  <span className="mt-1 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     {metric.label}
                   </span>
                 </div>
@@ -171,28 +164,17 @@ export default async function HomePage() {
       {/* ============================================================ */}
       <section className="py-20 bg-white dark:bg-obsidian-950 transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/20 bg-cobalt-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cobalt-600 dark:text-cyan-400">
-                Core Platform Architecture
-              </div>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                {content.ecosystem_heading || "The 6 Core Business & Technology Divisions"}
-              </h2>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
-                {content.ecosystem_subtitle ||
-                  "Engineered for sovereign operational excellence, sub-millisecond edge latency, and unyielding enterprise security standards."}
-              </p>
-            </div>
-
-            <Link
-              href="/platforms"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-cobalt-600 hover:text-cobalt-700 dark:text-cyan-400 dark:hover:text-cyan-300"
-            >
-              <span>View Full Division Directory</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+          <SectionHeader
+            index="02"
+            eyebrow="Core Platform Architecture"
+            title={content.ecosystem_heading || "The 6 Core Business & Technology Divisions"}
+            description={
+              content.ecosystem_subtitle ||
+              "Engineered for sovereign operational excellence, sub-millisecond edge latency, and unyielding enterprise security standards."
+            }
+            linkHref="/platforms"
+            linkLabel="View Full Division Directory"
+          />
 
           <PlatformFilterGrid platforms={platforms} enableSearch enableStatusFilter />
         </div>

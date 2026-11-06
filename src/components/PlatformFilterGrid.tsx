@@ -16,6 +16,36 @@ const FILTER_GROUPS = [
   "ESG & Governance",
 ];
 
+const GROUP_LABELS: Record<string, "allDivisions" | "groupCoreInfra" | "groupAiData" | "groupB2bApi" | "groupFintech" | "groupIncubation" | "groupEsg"> = {
+  "All Divisions": "allDivisions",
+  "Core Infrastructure": "groupCoreInfra",
+  "AI & Big Data": "groupAiData",
+  "B2B Platform & API": "groupB2bApi",
+  "FinTech & Cybersecurity": "groupFintech",
+  "Platform Incubation": "groupIncubation",
+  "ESG & Governance": "groupEsg",
+};
+
+const STATUS_VALUES = [
+  "Core Architecture",
+  "Live",
+  "Expanding",
+  "R&D Phase",
+  "Coming Soon",
+  "In Development",
+  "Temporarily Unavailable",
+] as const;
+
+const STATUS_LABELS: Record<string, "statusCoreArch" | "statusLive" | "statusExpanding" | "statusRnd" | "statusComingSoon" | "statusInDev" | "statusUnavailable"> = {
+  "Core Architecture": "statusCoreArch",
+  Live: "statusLive",
+  Expanding: "statusExpanding",
+  "R&D Phase": "statusRnd",
+  "Coming Soon": "statusComingSoon",
+  "In Development": "statusInDev",
+  "Temporarily Unavailable": "statusUnavailable",
+};
+
 export function PlatformFilterGrid({
   platforms,
   enableSearch = false,
@@ -28,7 +58,7 @@ export function PlatformFilterGrid({
   const [selectedGroup, setSelectedGroup] = useState("All Divisions");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
 
   const filtered = useMemo(() => {
     return platforms.filter((platform) => {
@@ -77,7 +107,7 @@ export function PlatformFilterGrid({
                     : "border border-slate-200 bg-white text-slate-700 hover:border-cobalt-400 hover:text-cobalt-600 dark:border-white/10 dark:bg-obsidian-900 dark:text-slate-300 dark:hover:border-cyan-400 dark:hover:text-cyan-300"
                 }`}
               >
-                {group}
+                {t.filters[GROUP_LABELS[group]]}
               </button>
             );
           })}
@@ -93,6 +123,7 @@ export function PlatformFilterGrid({
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label={locale === "ko" ? "부문명, 코드, 분야 검색" : "Search divisions by name, code, or sector"}
                   placeholder={locale === "ko" ? "부문명, 코드, 분야 검색..." : "Search division by code or tech..."}
                   className="w-full rounded-xl border border-slate-200 bg-white py-1.5 pl-10 pr-9 text-xs text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-900 dark:text-white"
                 />
@@ -112,13 +143,15 @@ export function PlatformFilterGrid({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
+                aria-label={locale === "ko" ? "운영 상태별 필터" : "Filter by operational status"}
                 className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-900 dark:text-slate-200"
               >
-                <option value="All Statuses">All Operational Statuses</option>
-                <option value="Core Architecture">Core Architecture</option>
-                <option value="Live">Live</option>
-                <option value="Expanding">Expanding</option>
-                <option value="R&D Phase">R&D Phase</option>
+                <option value="All Statuses">{t.filters.allStatuses}</option>
+                {STATUS_VALUES.map((s) => (
+                  <option key={s} value={s}>
+                    {t.filters[STATUS_LABELS[s]]}
+                  </option>
+                ))}
               </select>
             )}
           </div>

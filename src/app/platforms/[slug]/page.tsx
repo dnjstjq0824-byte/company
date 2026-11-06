@@ -5,17 +5,8 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  ExternalLink,
   Users,
   Briefcase,
-  Layers,
-  Globe,
-  Cloud,
-  Cpu,
-  Network,
-  ShieldCheck,
-  Boxes,
-  Activity,
 } from "lucide-react";
 import {
   getPublishedPlatformBySlug,
@@ -23,35 +14,21 @@ import {
   getAllSiteSettings,
   isVerifiedExternalUrl,
 } from "@/lib/data";
+import { absoluteUrl } from "@/lib/seo";
+import { getDivisionIcon } from "@/lib/division-icons";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PlatformCard } from "@/components/PlatformCard";
 
 export const dynamic = "force-dynamic";
 
-function getDivisionIcon(iconName: string) {
-  switch (iconName) {
-    case "Cloud":
-      return Cloud;
-    case "Cpu":
-      return Cpu;
-    case "Network":
-      return Network;
-    case "ShieldCheck":
-      return ShieldCheck;
-    case "Boxes":
-      return Boxes;
-    case "Globe":
-      return Globe;
-    default:
-      return Layers;
-  }
-}
-
 export async function generateMetadata(context: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await context.params;
-  const platform = await getPublishedPlatformBySlug(slug);
+  const [platform, settings] = await Promise.all([
+    getPublishedPlatformBySlug(slug),
+    getAllSiteSettings(),
+  ]);
 
   if (!platform) {
     return {
@@ -64,19 +41,25 @@ export async function generateMetadata(context: {
     `${platform.name} — ${platform.category} | Booking Network Global Group`;
   const description =
     platform.seo_description || platform.short_description;
+  const canonical = `/platforms/${platform.slug}`;
 
   return {
     title,
     description,
     alternates: {
-      canonical: `/platforms/${platform.slug}`,
+      canonical,
     },
     openGraph: {
       title,
       description,
       type: "website",
-      url: `/platforms/${platform.slug}`,
+      url: absoluteUrl(settings, canonical),
       images: platform.logo ? [{ url: platform.logo }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
   };
 }
@@ -85,24 +68,22 @@ export default async function PlatformDetailPage(context: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await context.params;
-  const [platform, allPlatforms, settings] = await Promise.all([
+  const [platform, allPlatforms] = await Promise.all([
     getPublishedPlatformBySlug(slug),
     getPublishedPlatforms(),
-    getAllSiteSettings(),
   ]);
 
   if (!platform) {
     notFound();
   }
 
-  const companyName = settings.company_name || "Booking Network Global Group";
   const hasVerifiedUrl = isVerifiedExternalUrl(
     platform.website_url,
     platform.platform_status
   );
 
   const relatedPlatforms = allPlatforms
-    .filter((p) => p.id !== platform.id)
+    .filter((p) => p.slug !== platform.slug)
     .slice(0, 3);
 
   const descriptionParagraphs = (
@@ -247,9 +228,19 @@ export default async function PlatformDetailPage(context: {
                 <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Request architectural documentation, API credentials, or explore strategic joint ventures.
                 </p>
+                {hasVerifiedUrl && platform.website_url && (
+                  <a
+                    href={platform.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-cobalt-500/30 bg-white px-5 py-3 text-xs font-bold text-cobalt-700 hover:bg-cobalt-50 dark:bg-white/5 dark:text-cyan-300 dark:hover:bg-white/10 transition-colors"
+                  >
+                    <span>Visit Live Endpoint</span>
+                  </a>
+                )}
                 <Link
                   href="/contact"
-                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-cobalt-600 px-5 py-3 text-xs font-bold text-white shadow-md hover:bg-cobalt-500 transition-colors"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-cobalt-600 px-5 py-3 text-xs font-bold text-white shadow-md hover:bg-cobalt-500 transition-colors"
                 >
                   <span>Submit Partnership Request</span>
                   <ArrowRight className="h-3.5 w-3.5" />

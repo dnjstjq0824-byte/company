@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import {
-  Mail,
   MapPin,
   Phone,
   Clock,
-  Globe,
-  ExternalLink,
-  MessageSquare,
   ShieldCheck,
   Building2,
-  Sparkles,
+  ArrowUpRight,
 } from "lucide-react";
 import { getAllSiteSettings } from "@/lib/data";
 import { ContactForm } from "@/components/ContactForm";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +19,19 @@ export const metadata: Metadata = {
   description:
     "Contact Booking Network Global Group for enterprise partnerships, technology integrations, institutional investor relations, or media inquiries.",
   alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Strategic Partnerships & Contact | Booking Network Global Group",
+    description:
+      "Contact Booking Network Global Group for enterprise partnerships, technology integrations, institutional investor relations, or media inquiries.",
+    type: "website",
+    url: "/contact",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Strategic Partnerships & Contact | Booking Network Global Group",
+    description:
+      "Contact Booking Network Global Group for enterprise partnerships, technology integrations, institutional investor relations, or media inquiries.",
+  },
 };
 
 export default async function ContactPage(context: {
@@ -46,27 +57,20 @@ export default async function ContactPage(context: {
     { label: "GitHub", url: settings.social_github?.trim() },
   ].filter((s) => Boolean(s.url));
 
+  const isKo = (await cookies()).get("bng_locale")?.value === "ko";
+
   return (
     <div className="bg-white dark:bg-obsidian-950 transition-colors">
-      {/* Header */}
-      <section className="bg-obsidian-950 py-16 text-white sm:py-24 border-b border-white/10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-cobalt-500/10 rounded-full blur-[140px] pointer-events-none" />
-
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-400">
-              <Sparkles className="h-3.5 w-3.5" />
-              Global Engagement & Strategic Inquiries
-            </span>
-            <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              Contact & Strategic Alliance
-            </h1>
-            <p className="mt-4 text-base sm:text-lg leading-relaxed text-slate-300">
-              Engage with {companyName}'s executive governance, enterprise architecture council, institutional investor relations, or global media communications.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        index="05"
+        eyebrow={isKo ? "글로벌 협력 & 전략 문의" : "Global Engagement & Strategic Inquiries"}
+        title={isKo ? "문의 & 전략적 제휴" : "Contact & Strategic Alliance"}
+        description={
+          isKo
+            ? `${companyName}의 경영진, 엔터프라이즈 아키텍처 위원회, 기관 IR 또는 글로벌 미디어 커뮤니케이션팀과 연결하세요.`
+            : `Engage with ${companyName}'s executive governance, enterprise architecture council, institutional investor relations, or global media communications.`
+        }
+      />
 
       {/* Main Content */}
       <section className="py-16 sm:py-20">
@@ -151,6 +155,30 @@ export default async function ContactPage(context: {
                   </div>
                 </div>
               </div>
+
+              {/* Global Social Channels */}
+              {socialLinks.length > 0 && (
+                <div className="rounded-3xl border border-slate-200/90 bg-white p-7 dark:border-white/10 dark:bg-obsidian-900 shadow-sm">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    {isKo ? "글로벌 채널" : "Global Channels"}
+                  </h3>
+                  <ul className="mt-4 space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
+                    {socialLinks.map((s) => (
+                      <li key={s.label}>
+                        <a
+                          href={s.url!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 font-semibold text-cobalt-600 hover:underline dark:text-cyan-400"
+                        >
+                          <span>{s.label}</span>
+                          <ArrowUpRight className="h-3 w-3" />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>

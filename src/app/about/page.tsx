@@ -1,27 +1,23 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import {
   ArrowRight,
   Compass,
   Target,
-  Layers,
   Cpu,
   CheckCircle2,
-  Globe,
-  Building2,
   ShieldCheck,
   Scale,
   MapPin,
   Mail,
-  ArrowUpRight,
-  Sparkles,
 } from "lucide-react";
 import {
   getContentPageBySlug,
   getAllSiteSettings,
-  getPublishedPlatforms,
   getActiveGlobalHubs,
 } from "@/lib/data";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -43,22 +39,25 @@ interface AboutContent {
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getContentPageBySlug<AboutContent>("about");
+  const title =
+    page?.seo_metadata?.title ||
+    "About Us — Corporate Governance & Vision | Booking Network Global Group";
+  const description =
+    page?.seo_metadata?.description ||
+    "Learn about Booking Network Global Group's institutional governance, strategic vision, R&D roadmap, and global regional hubs.";
   return {
-    title:
-      page?.seo_metadata?.title ||
-      "About Us — Corporate Governance & Vision | Booking Network Global Group",
-    description:
-      page?.seo_metadata?.description ||
-      "Learn about Booking Network Global Group's institutional governance, strategic vision, R&D roadmap, and global regional hubs.",
+    title,
+    description,
     alternates: { canonical: "/about" },
+    openGraph: { title, description, type: "website", url: "/about" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
 export default async function AboutPage() {
-  const [pageData, settings, platforms, globalHubs] = await Promise.all([
+  const [pageData, settings, globalHubs] = await Promise.all([
     getContentPageBySlug<AboutContent>("about"),
     getAllSiteSettings(),
-    getPublishedPlatforms(),
     getActiveGlobalHubs(),
   ]);
 
@@ -110,27 +109,17 @@ export default async function AboutPage() {
     "Carbon-aware computational dispatch and green datacenter energy telemetry",
   ];
 
+  const isKo = (await cookies()).get("bng_locale")?.value === "ko";
+
   return (
     <div className="bg-white dark:bg-obsidian-950 transition-colors">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-slate-200/80 bg-slate-50/50 py-20 dark:border-white/10 dark:bg-obsidian-900/60">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-cobalt-500/20 bg-cobalt-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-cobalt-600 dark:text-cyan-400">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Corporate Overview & Governance</span>
-            </div>
-
-            <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              {content.overview_heading || "Corporate Governance & Strategic Architecture"}
-            </h1>
-
-            <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-              {tagline}
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        index="01"
+        tone="light"
+        eyebrow={isKo ? "기업 개요 & 거버넌스" : "Corporate Overview & Governance"}
+        title={content.overview_heading || (isKo ? "기업 거버넌스 & 전략 아키텍처" : "Corporate Governance & Strategic Architecture")}
+        description={tagline}
+      />
 
       {/* Corporate Overview Body */}
       <section className="py-20">
@@ -314,6 +303,15 @@ export default async function AboutPage() {
             </p>
           </div>
 
+          {globalHubs.length === 0 ? (
+            <div className="mt-12 rounded-3xl border border-dashed border-slate-300 py-16 text-center dark:border-white/15">
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                {isKo
+                  ? "글로벌 거점 정보를 업데이트하고 있습니다. 지역별 상세 내용은 문의해 주세요."
+                  : "Global hub information is being updated. Please contact us for regional details."}
+              </p>
+            </div>
+          ) : (
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {globalHubs.map((hub) => (
               <div
@@ -361,6 +359,7 @@ export default async function AboutPage() {
               </div>
             ))}
           </div>
+          )}
         </div>
       </section>
 

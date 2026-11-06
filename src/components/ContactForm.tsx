@@ -23,6 +23,32 @@ const DEPARTMENTS = [
   "Legal & Regulatory Compliance",
 ];
 
+// Korean display labels (submitted values stay in English).
+const INQUIRY_TYPES_KO = [
+  "전략적 파트너십",
+  "투자자 관계 (IR)",
+  "미디어 & 언론",
+  "엔터프라이즈 기술 & API",
+  "글로벌 채용",
+  "일반 기업 문의",
+];
+
+const DEPARTMENTS_KO = [
+  "글로벌 파트너십 & 제휴",
+  "투자자 관계 (IR)",
+  "기업 커뮤니케이션 & PR",
+  "기술 & 아키텍처 위원회",
+  "경영진 사무실",
+  "법무 & 규제 준수",
+];
+
+const PRIORITIES = [
+  { value: "Normal", en: "Normal — Standard Business Review", ko: "일반 — 표준 업무 검토" },
+  { value: "High", en: "High — Active Transaction / RFP", ko: "높음 — 진행 중 거래 / RFP" },
+  { value: "Urgent", en: "Urgent — Executive / Regulatory Priority", ko: "긴급 — 경영진 / 규제 우선" },
+  { value: "Low", en: "Low — General Informational", ko: "낮음 — 일반 정보성" },
+];
+
 export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -43,29 +69,40 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submittedMessage, setSubmittedMessage] = useState("");
-  const { locale, t } = useLanguage();
+  const { locale } = useLanguage();
 
   const validateClient = () => {
+    const ko = locale === "ko";
     const errors: Record<string, string> = {};
     if (fullName.trim().length < 2) {
-      errors.full_name = "Please enter your full name (at least 2 characters).";
+      errors.full_name = ko
+        ? "성함을 입력해 주세요 (2자 이상)."
+        : "Please enter your full name (at least 2 characters).";
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) {
-      errors.email = "Please enter a valid email address.";
+      errors.email = ko
+        ? "유효한 이메일 주소를 입력해 주세요."
+        : "Please enter a valid email address.";
     }
     if (!INQUIRY_TYPES.includes(inquiryType)) {
-      errors.inquiry_type = "Please select a valid inquiry type.";
+      errors.inquiry_type = ko
+        ? "유효한 문의 유형을 선택해 주세요."
+        : "Please select a valid inquiry type.";
     }
     if (subject.trim().length < 3) {
-      errors.subject = "Please enter a subject (at least 3 characters).";
+      errors.subject = ko
+        ? "제목을 입력해 주세요 (3자 이상)."
+        : "Please enter a subject (at least 3 characters).";
     }
     if (message.trim().length < 10) {
-      errors.message =
-        "Please provide a detailed message (at least 10 characters).";
+      errors.message = ko
+        ? "상세 내용을 입력해 주세요 (10자 이상)."
+        : "Please provide a detailed message (at least 10 characters).";
     }
     if (!privacyConsent) {
-      errors.privacy_consent =
-        "You must consent to the Privacy Policy before submitting.";
+      errors.privacy_consent = ko
+        ? "제출 전에 개인정보 처리방침에 동의해 주세요."
+        : "You must consent to the Privacy Policy before submitting.";
     }
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -193,15 +230,16 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
         {/* Full Name */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-            Full Name <span className="text-rose-500">*</span>
+          <label htmlFor="cf-name" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            {locale === "ko" ? "성함" : "Full Name"} <span className="text-rose-500">*</span>
           </label>
           <input
+            id="cf-name"
             type="text"
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="e.g. Sarah Jenkins"
+            placeholder={locale === "ko" ? "예: 홍길동" : "e.g. Sarah Jenkins"}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
           />
           {fieldErrors.full_name && (
@@ -211,10 +249,11 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
 
         {/* Corporate Email */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-            Corporate Email <span className="text-rose-500">*</span>
+          <label htmlFor="cf-email" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            {locale === "ko" ? "기업 이메일" : "Corporate Email"} <span className="text-rose-500">*</span>
           </label>
           <input
+            id="cf-email"
             type="email"
             required
             value={email}
@@ -229,31 +268,33 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
 
         {/* Company / Organization */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-            Company / Organization
+          <label htmlFor="cf-company" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            {locale === "ko" ? "기업 / 기관명" : "Company / Organization"}
           </label>
           <input
+            id="cf-company"
             type="text"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            placeholder="e.g. Apex Global Systems Ltd."
+            placeholder={locale === "ko" ? "예: 에이펙스글로벌시스템즈" : "e.g. Apex Global Systems Ltd."}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
           />
         </div>
 
         {/* Routing Department */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-            Target Group Department
+          <label htmlFor="cf-department" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            {locale === "ko" ? "담당 그룹 부서" : "Target Group Department"}
           </label>
           <select
+            id="cf-department"
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
           >
-            {DEPARTMENTS.map((dept) => (
+            {DEPARTMENTS.map((dept, i) => (
               <option key={dept} value={dept}>
-                {dept}
+                {locale === "ko" ? DEPARTMENTS_KO[i] : dept}
               </option>
             ))}
           </select>
@@ -261,50 +302,57 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
 
         {/* Inquiry Classification */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-            Inquiry Category <span className="text-rose-500">*</span>
+          <label htmlFor="cf-inquiry-type" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            {locale === "ko" ? "문의 분류" : "Inquiry Category"} <span className="text-rose-500">*</span>
           </label>
           <select
+            id="cf-inquiry-type"
             value={inquiryType}
             onChange={(e) => setInquiryType(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
           >
-            {INQUIRY_TYPES.map((type) => (
+            {INQUIRY_TYPES.map((type, i) => (
               <option key={type} value={type}>
-                {type}
+                {locale === "ko" ? INQUIRY_TYPES_KO[i] : type}
+              </option>
+            ))}
+          </select>
+          {fieldErrors.inquiry_type && (
+            <p className="mt-1 text-xs text-rose-500">{fieldErrors.inquiry_type}</p>
+          )}
+        </div>
+
+        {/* Priority Tier */}
+        <div>
+          <label htmlFor="cf-priority" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            {locale === "ko" ? "문의 우선순위" : "Engagement Priority"}
+          </label>
+          <select
+            id="cf-priority"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
+          >
+            {PRIORITIES.map((p) => (
+              <option key={p.value} value={p.value}>
+                {locale === "ko" ? p.ko : p.en}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Priority Tier */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-            Engagement Priority
-          </label>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
-          >
-            <option value="Normal">Normal — Standard Business Review</option>
-            <option value="High">High — Active Transaction / RFP</option>
-            <option value="Urgent">Urgent — Executive / Regulatory Priority</option>
-            <option value="Low">Low — General Informational</option>
-          </select>
-        </div>
-
         {/* Subject */}
         <div className="sm:col-span-2">
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-            Subject <span className="text-rose-500">*</span>
+          <label htmlFor="cf-subject" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            {locale === "ko" ? "제목" : "Subject"} <span className="text-rose-500">*</span>
           </label>
           <input
+            id="cf-subject"
             type="text"
             required
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="Summary of proposed collaboration or inquiry..."
+            placeholder={locale === "ko" ? "제안하는 협력 또는 문의 요약..." : "Summary of proposed collaboration or inquiry..."}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white"
           />
           {fieldErrors.subject && (
@@ -314,15 +362,16 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
 
         {/* Detailed Message */}
         <div className="sm:col-span-2">
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-            Message Body <span className="text-rose-500">*</span>
+          <label htmlFor="cf-message" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+            {locale === "ko" ? "상세 내용" : "Message Body"} <span className="text-rose-500">*</span>
           </label>
           <textarea
+            id="cf-message"
             required
             rows={5}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Please detail your scope, requirements, organization background, and timeline..."
+            placeholder={locale === "ko" ? "범위, 요구사항, 기관 배경 및 일정을 상세히 적어주세요..." : "Please detail your scope, requirements, organization background, and timeline..."}
             className="w-full rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-950 dark:text-white leading-relaxed"
           />
           {fieldErrors.message && (
@@ -332,19 +381,32 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
 
         {/* Privacy Consent Checkbox */}
         <div className="sm:col-span-2">
-          <label className="flex items-start gap-3 cursor-pointer">
+          <label htmlFor="cf-consent" className="flex items-start gap-3 cursor-pointer">
             <input
+              id="cf-consent"
               type="checkbox"
               checked={privacyConsent}
               onChange={(e) => setPrivacyConsent(e.target.checked)}
               className="mt-1 h-4 w-4 rounded border-slate-300 text-cobalt-600 focus:ring-cobalt-500 dark:border-white/20 dark:bg-obsidian-950"
             />
             <span className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              I consent to Booking Network Global Group processing the submitted corporate data in accordance with the{" "}
-              <Link href="/privacy" className="text-cobalt-600 dark:text-cyan-400 underline font-semibold" target="_blank">
-                Privacy Policy & Data Governance Charter
-              </Link>
-              . We do not sell or transfer inquiry information to external commercial parties.
+              {locale === "ko" ? (
+                <>
+                  제출한 기업 데이터가{" "}
+                  <Link href="/privacy" className="text-cobalt-600 dark:text-cyan-400 underline font-semibold" target="_blank">
+                    개인정보 처리방침 및 데이터 거버넌스 헌장
+                  </Link>
+                  에 따라 처리되는 것에 동의합니다. 문의 정보를 외부 영리 단체에 판매하거나 이전하지 않습니다.
+                </>
+              ) : (
+                <>
+                  I consent to Booking Network Global Group processing the submitted corporate data in accordance with the{" "}
+                  <Link href="/privacy" className="text-cobalt-600 dark:text-cyan-400 underline font-semibold" target="_blank">
+                    Privacy Policy & Data Governance Charter
+                  </Link>
+                  . We do not sell or transfer inquiry information to external commercial parties.
+                </>
+              )}
             </span>
           </label>
           {fieldErrors.privacy_consent && (
@@ -362,7 +424,7 @@ export function ContactForm({ initialPlatform }: { initialPlatform?: string }) {
           {submitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Transmitting Encrypted Payload...</span>
+              <span>{locale === "ko" ? "암호화 전송 중..." : "Transmitting Encrypted Payload..."}</span>
             </>
           ) : (
             <>

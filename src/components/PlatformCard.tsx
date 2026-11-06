@@ -1,42 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  ExternalLink,
-  Cloud,
-  Cpu,
-  Network,
-  ShieldCheck,
-  Boxes,
-  Globe,
-  Layers,
-} from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { ParsedPlatform, isVerifiedExternalUrl } from "@/lib/data";
+import { getDivisionIcon } from "@/lib/division-icons";
 import { StatusBadge } from "./StatusBadge";
 import { useLanguage } from "@/lib/i18n";
 
-function getDivisionIcon(iconName: string) {
-  switch (iconName) {
-    case "Cloud":
-      return Cloud;
-    case "Cpu":
-      return Cpu;
-    case "Network":
-      return Network;
-    case "ShieldCheck":
-      return ShieldCheck;
-    case "Boxes":
-      return Boxes;
-    case "Globe":
-      return Globe;
-    default:
-      return Layers;
-  }
+const STATUS_KO: Record<string, string> = {
+  "Core Architecture": "핵심 아키텍처",
+  Live: "운영 중",
+  Expanding: "확장 중",
+  "R&D Phase": "R&D 단계",
+  "Coming Soon": "출시 예정",
+  "In Development": "개발 중",
+  "Temporarily Unavailable": "일시 중단",
+};
+
+function statusKoLabel(status: string): string {
+  return STATUS_KO[status] || status;
 }
 
 export function PlatformCard({ platform }: { platform: ParsedPlatform }) {
-  const { locale, t } = useLanguage();
+  const { locale } = useLanguage();
   const IconComponent = getDivisionIcon(platform.icon_name);
   const hasLiveUrl = isVerifiedExternalUrl(
     platform.website_url,
@@ -44,7 +30,7 @@ export function PlatformCard({ platform }: { platform: ParsedPlatform }) {
   );
 
   return (
-    <article className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cobalt-500/50 hover:shadow-xl dark:border-white/10 dark:bg-obsidian-900/90 dark:hover:border-cyan-400/50">
+    <article className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition-colors duration-300 hover:border-cobalt-500/50 hover:shadow-xl dark:border-white/10 dark:bg-obsidian-900/90 dark:hover:border-cyan-400/50">
       <div>
         {/* Top Header: Monogram/Icon + Division Code + Status */}
         <div className="flex items-start justify-between gap-3">
@@ -117,7 +103,7 @@ export function PlatformCard({ platform }: { platform: ParsedPlatform }) {
           </a>
         ) : (
           <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
-            {platform.platform_status}
+            {locale === "ko" ? statusKoLabel(platform.platform_status) : platform.platform_status}
           </span>
         )}
       </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Globe, Mail, MapPin, Phone, ShieldCheck, ArrowUpRight } from "lucide-react";
+import { Globe, Mail, MapPin, ShieldCheck, ArrowUpRight } from "lucide-react";
 import { ParsedPlatform } from "@/lib/data";
 import { useLanguage } from "@/lib/i18n";
 import { APP_VERSION, COMMIT_SHA } from "@/lib/version";
@@ -40,7 +40,6 @@ export function Footer({
 
   const corporateEmail = settings.corporate_email?.trim() || "contact@bookingnetwork.com";
   const irEmail = settings.ir_email?.trim() || "ir@bookingnetwork.com";
-  const telephone = settings.telephone?.trim();
   const businessAddress = settings.business_address?.trim() || "Teheran-ro, Gangnam-gu, Seoul, Republic of Korea";
 
   const socialLinks = [
@@ -49,6 +48,9 @@ export function Footer({
     { label: "YouTube", url: settings.social_youtube?.trim() },
     { label: "GitHub", url: settings.social_github?.trim() },
   ].filter((s) => Boolean(s.url));
+
+  const platformHref = (slug: string) =>
+    platforms.some((p) => p.slug === slug) ? `/platforms/${slug}` : "/platforms";
 
   return (
     <footer className="border-t border-slate-200/80 bg-obsidian-950 text-slate-300 dark:border-white/10 transition-colors">
@@ -170,7 +172,7 @@ export function Footer({
                 </Link>
               </li>
               <li>
-                <Link href="/platforms/sustainable-tech-esg" className="hover:text-white transition-colors">
+                <Link href={platformHref("sustainable-tech-esg")} className="hover:text-white transition-colors">
                   {locale === "ko" ? "ESG & 기술 윤리" : "ESG & Technology Ethics"}
                 </Link>
               </li>
@@ -247,7 +249,7 @@ export function Footer({
                 </Link>
               </li>
               <li>
-                <Link href="/platforms/fintech-trust-security" className="hover:text-white transition-colors flex items-center gap-1">
+                <Link href={platformHref("fintech-trust-security")} className="hover:text-white transition-colors flex items-center gap-1">
                   <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
                   <span>{locale === "ko" ? "제로트러스트 거버넌스" : "Zero-Trust Security"}</span>
                 </Link>
@@ -266,11 +268,11 @@ export function Footer({
 
         {/* Bottom Copyright */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-8 sm:flex-row text-xs text-slate-500">
-          <p>{t.common.footerCopyright}</p>
+          <p>{settings.footer_copyright?.trim() || t.common.footerCopyright}</p>
           <div className="flex flex-wrap items-center gap-4">
             <span className="inline-flex items-center gap-1.5 text-slate-400">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Backbone Status: 99.999% SLA Operational</span>
+              <span>{t.footer.backboneStatus}</span>
             </span>
             <span className="font-mono text-[11px] text-slate-500 border-l border-slate-800 pl-4">
               v{APP_VERSION} ({COMMIT_SHA})

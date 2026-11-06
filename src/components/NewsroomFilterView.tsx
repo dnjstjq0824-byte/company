@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -39,10 +39,34 @@ function getCategoryIcon(cat: string) {
   }
 }
 
-export function NewsroomFilterView({ posts }: { posts: ParsedNewsPost[] }) {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+const CATEGORY_LABELS: Record<string, "all" | "pressRelease" | "irGovernance" | "technology" | "globalNotice"> = {
+  All: "all",
+  "Press Release": "pressRelease",
+  "IR & Governance": "irGovernance",
+  Technology: "technology",
+  "Global Notice": "globalNotice",
+};
+
+export function NewsroomFilterView({
+  posts,
+  initialCategory,
+}: {
+  posts: ParsedNewsPost[];
+  initialCategory?: string;
+}) {
+  const validInitial =
+    initialCategory && CATEGORIES.includes(initialCategory)
+      ? initialCategory
+      : "All";
+  const [selectedCategory, setSelectedCategory] = useState(validInitial);
   const [searchQuery, setSearchQuery] = useState("");
   const { locale, t } = useLanguage();
+
+  useEffect(() => {
+    if (initialCategory && CATEGORIES.includes(initialCategory)) {
+      setSelectedCategory(initialCategory);
+    }
+  }, [initialCategory]);
 
   const filtered = useMemo(() => {
     return posts.filter((post) => {
@@ -78,7 +102,7 @@ export function NewsroomFilterView({ posts }: { posts: ParsedNewsPost[] }) {
                     : "border border-slate-200 bg-white text-slate-700 hover:border-cobalt-400 hover:text-cobalt-600 dark:border-white/10 dark:bg-obsidian-900 dark:text-slate-300 dark:hover:border-cyan-400 dark:hover:text-cyan-300"
                 }`}
               >
-                {cat === "All" && locale === "ko" ? "전체 보기" : cat}
+                {t.filters[CATEGORY_LABELS[cat]]}
               </button>
             );
           })}
@@ -91,6 +115,7 @@ export function NewsroomFilterView({ posts }: { posts: ParsedNewsPost[] }) {
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label={locale === "ko" ? "공시·기사 검색" : "Search releases and disclosures"}
             placeholder={locale === "ko" ? "공시·기사 검색..." : "Search releases & disclosures..."}
             className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-9 text-xs text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:outline-none dark:border-white/10 dark:bg-obsidian-900 dark:text-white"
           />
@@ -120,7 +145,7 @@ export function NewsroomFilterView({ posts }: { posts: ParsedNewsPost[] }) {
             return (
               <article
                 key={post.slug}
-                className="group flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cobalt-500/50 hover:shadow-xl dark:border-white/10 dark:bg-obsidian-900/90 dark:hover:border-cyan-400/50"
+                className="group flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition-colors duration-300 hover:border-cobalt-500/50 hover:shadow-xl dark:border-white/10 dark:bg-obsidian-900/90 dark:hover:border-cyan-400/50"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
@@ -132,7 +157,7 @@ export function NewsroomFilterView({ posts }: { posts: ParsedNewsPost[] }) {
                     {post.is_featured && (
                       <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-500 border border-amber-500/20">
                         <Sparkles className="h-2.5 w-2.5" />
-                        Featured
+                        {locale === "ko" ? "주요" : "Featured"}
                       </span>
                     )}
                   </div>
