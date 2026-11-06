@@ -6,9 +6,14 @@ import { getAllSiteSettings } from "@/lib/data";
 
 const ALLOWED_SETTING_KEYS = [
   "company_name",
+  "company_name_kr",
   "tagline",
+  "tagline_kr",
   "brand_positioning",
+  "brand_positioning_kr",
   "corporate_email",
+  "ir_email",
+  "pr_email",
   "telephone",
   "business_address",
   "operating_hours",
@@ -25,9 +30,9 @@ const ALLOWED_SETTING_KEYS = [
   "favicon",
   "cookie_consent_enabled",
   "default_locale",
-  "announcement_bar_enabled",
-  "announcement_bar_text",
-  "announcement_bar_link",
+  "global_announcement_enabled",
+  "global_announcement_text",
+  "global_announcement_link",
 ];
 
 export async function GET() {

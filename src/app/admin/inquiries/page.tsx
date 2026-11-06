@@ -6,15 +6,8 @@ import {
   Download,
   Trash2,
   Loader2,
-  CheckCircle2,
   X,
   Mail,
-  Building2,
-  Calendar,
-  AlertCircle,
-  Clock,
-  User,
-  ExternalLink,
 } from "lucide-react";
 
 interface InquiryRecord {
@@ -52,7 +45,10 @@ export default function AdminInquiriesPage() {
   const [notesDraft, setNotesDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const fetchInquiries = async () => {
     setLoading(true);
@@ -120,8 +116,16 @@ export default function AdminInquiriesPage() {
           prev.map((i) => (i.id === selectedInquiry.id ? data.inquiry : i))
         );
         setSelectedInquiry(data.inquiry);
-        setFeedback("Inquiry updated successfully.");
+        setFeedback({ type: "success", text: "Inquiry updated successfully." });
+      } else {
+        const data = await res.json().catch(() => null);
+        setFeedback({
+          type: "error",
+          text: data?.error || "Failed to update inquiry.",
+        });
       }
+    } catch {
+      setFeedback({ type: "error", text: "Network error while updating inquiry." });
     } finally {
       setSaving(false);
     }
@@ -138,10 +142,16 @@ export default function AdminInquiriesPage() {
           setSelectedInquiry(null);
         }
         setDeleteConfirmId(null);
-        setFeedback("Inquiry deleted successfully.");
+        setFeedback({ type: "success", text: "Inquiry deleted successfully." });
+      } else {
+        const data = await res.json().catch(() => null);
+        setFeedback({
+          type: "error",
+          text: data?.error || "Failed to delete inquiry.",
+        });
       }
     } catch {
-      setFeedback("Failed to delete inquiry.");
+      setFeedback({ type: "error", text: "Failed to delete inquiry." });
     }
   };
 
@@ -158,6 +168,7 @@ export default function AdminInquiriesPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- CSV file download from API route, not page navigation */}
           <a
             href="/api/admin/inquiries?format=csv"
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-xs font-semibold text-slate-200 hover:border-electric-500/50 hover:bg-slate-800 transition-all"
@@ -169,8 +180,14 @@ export default function AdminInquiriesPage() {
       </div>
 
       {feedback && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-950/40 p-4 text-xs font-semibold text-emerald-300">
-          <span>{feedback}</span>
+        <div
+          className={`flex items-center justify-between rounded-xl border p-4 text-xs font-semibold ${
+            feedback.type === "success"
+              ? "border-emerald-500/30 bg-emerald-950/40 text-emerald-300"
+              : "border-red-500/30 bg-red-950/40 text-red-300"
+          }`}
+        >
+          <span>{feedback.text}</span>
           <button type="button" onClick={() => setFeedback(null)}>
             <X className="h-3.5 w-3.5 text-slate-400 hover:text-white" />
           </button>
@@ -230,7 +247,15 @@ export default function AdminInquiriesPage() {
                 return (
                   <div
                     key={inq.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => openDetail(inq)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openDetail(inq);
+                      }
+                    }}
                     className={`cursor-pointer rounded-xl border p-4 transition-all ${
                       isSelected
                         ? "border-electric-500/60 bg-electric-950/20"
@@ -346,7 +371,17 @@ export default function AdminInquiriesPage() {
               </div>
 
               {/* CRM Triage Controls */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300">Department</label>
+                  <input
+                    type="text"
+                    value={departmentDraft}
+                    onChange={(e) => setDepartmentDraft(e.target.value)}
+                    placeholder="e.g. Enterprise Strategic Alliances"
+                    className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+                  />
+                </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-300">Status</label>
                   <select

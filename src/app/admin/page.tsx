@@ -4,16 +4,11 @@ import {
   Layers,
   Newspaper,
   Globe2,
-  Inbox,
   MailWarning,
   Activity,
   ArrowRight,
   FileEdit,
-  Settings,
-  ShieldCheck,
   Server,
-  Database,
-  ExternalLink,
 } from "lucide-react";
 import { getAuthenticatedAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

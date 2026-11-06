@@ -63,6 +63,12 @@ export async function PATCH(
         : existing.publication_status;
     const published_at =
       body.published_at ? new Date(body.published_at) : existing.published_at;
+    if (Number.isNaN(published_at.getTime())) {
+      return NextResponse.json(
+        { error: "Please provide a valid publication date." },
+        { status: 400 }
+      );
+    }
     const author_name =
       body.author_name !== undefined
         ? String(body.author_name).trim()

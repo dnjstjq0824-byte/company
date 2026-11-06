@@ -5,7 +5,10 @@ import { getAuthenticatedAdmin, logAdminActivity } from "@/lib/auth";
 import { parsePlatformRecord } from "@/lib/data";
 
 const VALID_STATUSES = [
+  "Core Architecture",
   "Live",
+  "Expanding",
+  "R&D Phase",
   "Coming Soon",
   "In Development",
   "Temporarily Unavailable",
@@ -76,7 +79,9 @@ export async function PATCH(
         : existing.business_purpose;
     const website_url =
       body.website_url !== undefined
-        ? String(body.website_url).trim()
+        ? body.website_url
+          ? String(body.website_url).trim()
+          : null
         : existing.website_url;
     const platform_status =
       body.platform_status && VALID_STATUSES.includes(body.platform_status)

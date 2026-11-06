@@ -8,7 +8,13 @@ import { Lock, AlertCircle, Loader2, ArrowLeft, Shield } from "lucide-react";
 function LoginFormInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get("redirect") || "/admin";
+  const rawRedirect = searchParams.get("redirect") || "/admin";
+  const redirectPath =
+    rawRedirect.startsWith("/") &&
+    !rawRedirect.startsWith("//") &&
+    !rawRedirect.includes("://")
+      ? rawRedirect
+      : "/admin";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

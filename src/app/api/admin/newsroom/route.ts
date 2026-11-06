@@ -59,6 +59,12 @@ export async function POST(request: NextRequest) {
       ? body.publication_status
       : "Published";
     const published_at = body.published_at ? new Date(body.published_at) : new Date();
+    if (Number.isNaN(published_at.getTime())) {
+      return NextResponse.json(
+        { error: "Please provide a valid publication date." },
+        { status: 400 }
+      );
+    }
     const author_name = String(body.author_name || "Global Communications").trim();
     const seo_title = body.seo_title ? String(body.seo_title).trim() : null;
     const seo_description = body.seo_description ? String(body.seo_description).trim() : null;

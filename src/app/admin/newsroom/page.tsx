@@ -10,10 +10,8 @@ import {
   Eye,
   Loader2,
   Newspaper,
-  Check,
   X,
   Star,
-  Calendar,
 } from "lucide-react";
 import { ParsedNewsPost } from "@/lib/data";
 
@@ -88,6 +86,15 @@ export default function AdminNewsroomPage() {
   useEffect(() => {
     fetchPosts();
   }, []);
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setModalOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [modalOpen]);
 
   const openCreateModal = () => {
     setForm({
@@ -461,7 +468,7 @@ export default function AdminNewsroomPage() {
                     <label className="block font-bold text-slate-200">Category</label>
                     <select
                       value={form.category}
-                      onChange={(e) => setForm({ ...form, category: e.target.value as any })}
+                      onChange={(e) => setForm({ ...form, category: e.target.value as NewsFormState["category"] })}
                       className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
                     >
                       {CATEGORIES.map((c) => (
@@ -540,6 +547,38 @@ export default function AdminNewsroomPage() {
                   <label htmlFor="is_featured" className="text-xs font-bold text-white cursor-pointer select-none">
                     Feature on Homepage News Highlights
                   </label>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-200">Thumbnail Image URL (optional)</label>
+                  <input
+                    type="text"
+                    value={form.thumbnail_url}
+                    onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
+                    placeholder="/uploads/thumbnail.png or https://..."
+                    className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-slate-300 focus:border-electric-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block font-bold text-slate-200">SEO Title (optional)</label>
+                    <input
+                      type="text"
+                      value={form.seo_title}
+                      onChange={(e) => setForm({ ...form, seo_title: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-200">SEO Description (optional)</label>
+                    <input
+                      type="text"
+                      value={form.seo_description}
+                      onChange={(e) => setForm({ ...form, seo_description: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 border-t border-slate-800 pt-4">

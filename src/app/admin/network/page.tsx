@@ -1,18 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Plus,
   Edit3,
   Trash2,
   Globe2,
-  MapPin,
-  Check,
   X,
   Loader2,
-  Building2,
-  Server,
 } from "lucide-react";
 import { ParsedGlobalHub } from "@/lib/data";
 
@@ -75,6 +70,15 @@ export default function AdminNetworkPage() {
   useEffect(() => {
     fetchHubs();
   }, []);
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setModalOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [modalOpen]);
 
   const openCreateModal = () => {
     setForm({
@@ -358,7 +362,7 @@ export default function AdminNetworkPage() {
                   <label className="block font-bold text-slate-200">Region Zone *</label>
                   <select
                     value={form.region}
-                    onChange={(e) => setForm({ ...form, region: e.target.value as any })}
+                    onChange={(e) => setForm({ ...form, region: e.target.value as HubFormState["region"] })}
                     className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
                   >
                     {REGIONS.map((r) => (
@@ -370,7 +374,7 @@ export default function AdminNetworkPage() {
                   <label className="block font-bold text-slate-200">Hub Role Classification *</label>
                   <select
                     value={form.hub_type}
-                    onChange={(e) => setForm({ ...form, hub_type: e.target.value as any })}
+                    onChange={(e) => setForm({ ...form, hub_type: e.target.value as HubFormState["hub_type"] })}
                     className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
                   >
                     {HUB_TYPES.map((t) => (

@@ -1,20 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Save,
   Loader2,
   CheckCircle2,
+  AlertCircle,
   ExternalLink,
   Plus,
   Trash2,
   Eye,
-  FileEdit,
-  Layers,
-  Shield,
-  HelpCircle,
 } from "lucide-react";
+
+interface CmsHeroMetric {
+  value?: string;
+  label?: string;
+}
+
+interface CmsPhilosophyItem {
+  title?: string;
+  description?: string;
+}
 
 interface CmsPageRecord {
   page_slug: string;
@@ -23,7 +29,7 @@ interface CmsPageRecord {
     title?: string;
     description?: string;
   };
-  content: Record<string, any>;
+  content: Record<string, unknown>;
 }
 
 const PAGE_TABS = [
@@ -38,7 +44,10 @@ export default function AdminContentPage() {
   const [activeTab, setActiveTab] = useState("home");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
   const [previewLegal, setPreviewLegal] = useState(false);
 
   useEffect(() => {
@@ -124,10 +133,19 @@ export default function AdminContentPage() {
         }),
       });
       if (res.ok) {
-        setFeedback(
-          `Saved and published changes to '${activeTab}' page successfully.`
-        );
+        setFeedback({
+          type: "success",
+          text: `Saved and published changes to '${activeTab}' page successfully.`,
+        });
+      } else {
+        const data = await res.json().catch(() => null);
+        setFeedback({
+          type: "error",
+          text: data?.error || `Failed to save '${activeTab}' page.`,
+        });
       }
+    } catch {
+      setFeedback({ type: "error", text: "Network error while saving content." });
     } finally {
       setSaving(false);
     }
@@ -142,7 +160,16 @@ export default function AdminContentPage() {
     );
   }
 
-  const c = (currentPage?.content || {}) as Record<string, any>;
+  const c = (currentPage?.content || {}) as Record<string, unknown>;
+  const heroMetrics: CmsHeroMetric[] = Array.isArray(c.hero_metrics)
+    ? (c.hero_metrics as CmsHeroMetric[])
+    : [];
+  const philosophyItems: CmsPhilosophyItem[] = Array.isArray(c.philosophy_items)
+    ? (c.philosophy_items as CmsPhilosophyItem[])
+    : [];
+  const innovationItems: string[] = Array.isArray(c.innovation_items)
+    ? (c.innovation_items as string[])
+    : [];
 
   return (
     <div className="space-y-6">
@@ -189,9 +216,19 @@ export default function AdminContentPage() {
       </div>
 
       {feedback && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-950/40 p-4 text-xs font-semibold text-emerald-300">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-          <span>{feedback}</span>
+        <div
+          className={`flex items-center gap-2 rounded-xl border p-4 text-xs font-semibold ${
+            feedback.type === "success"
+              ? "border-emerald-500/30 bg-emerald-950/40 text-emerald-300"
+              : "border-red-500/30 bg-red-950/40 text-red-300"
+          }`}
+        >
+          {feedback.type === "success" ? (
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+          ) : (
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
+          )}
+          <span>{feedback.text}</span>
         </div>
       )}
 
@@ -296,14 +333,13 @@ export default function AdminContentPage() {
               </div>
 
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {Array.isArray(c.hero_metrics) &&
-                  c.hero_metrics.map((m: any, idx: number) => (
+                {heroMetrics.map((m, idx) => (
                     <div key={idx} className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 p-2">
                       <input
                         type="text"
                         value={m.value || ""}
                         onChange={(e) => {
-                          const next = [...c.hero_metrics];
+                          const next = [...heroMetrics];
                           next[idx] = { ...next[idx], value: e.target.value };
                           updateField("hero_metrics", next);
                         }}
@@ -314,7 +350,7 @@ export default function AdminContentPage() {
                         type="text"
                         value={m.label || ""}
                         onChange={(e) => {
-                          const next = [...c.hero_metrics];
+                          const next = [...heroMetrics];
                           next[idx] = { ...next[idx], label: e.target.value };
                           updateField("hero_metrics", next);
                         }}
@@ -324,7 +360,7 @@ export default function AdminContentPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          const next = c.hero_metrics.filter((_: any, i: number) => i !== idx);
+                          const next = heroMetrics.filter((_, i: number) => i !== idx);
                           updateField("hero_metrics", next);
                         }}
                         className="rounded p-1 text-slate-500 hover:text-red-400"
@@ -336,25 +372,73 @@ export default function AdminContentPage() {
               </div>
             </div>
 
-            {/* About Section */}
+            {/* Hero CTAs */}
             <div className="border-t border-slate-800 pt-5 space-y-4">
-              <h3 className="font-bold text-white text-xs">About Holding Section</h3>
+              <h3 className="font-bold text-white text-xs">Hero Call-to-Actions</h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-bold text-slate-200">Primary Button Text</label>
+                  <input
+                    type="text"
+                    value={String(c.hero_primary_cta_text || "")}
+                    onChange={(e) => updateField("hero_primary_cta_text", e.target.value)}
+                    placeholder="Explore Core Divisions"
+                    className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-200">Primary Button Link</label>
+                  <input
+                    type="text"
+                    value={String(c.hero_primary_cta_link || "")}
+                    onChange={(e) => updateField("hero_primary_cta_link", e.target.value)}
+                    placeholder="/platforms"
+                    className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-200">Secondary Link Text</label>
+                  <input
+                    type="text"
+                    value={String(c.hero_secondary_cta_text || "")}
+                    onChange={(e) => updateField("hero_secondary_cta_text", e.target.value)}
+                    placeholder="Global Partnerships & IR"
+                    className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-200">Secondary Link Target</label>
+                  <input
+                    type="text"
+                    value={String(c.hero_secondary_cta_link || "")}
+                    onChange={(e) => updateField("hero_secondary_cta_link", e.target.value)}
+                    placeholder="/contact"
+                    className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Ecosystem Section */}
+            <div className="border-t border-slate-800 pt-5 space-y-4">
+              <h3 className="font-bold text-white text-xs">Divisions Section Heading</h3>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-200">Heading</label>
                   <input
                     type="text"
-                    value={String(c.about_heading || "")}
-                    onChange={(e) => updateField("about_heading", e.target.value)}
+                    value={String(c.ecosystem_heading || "")}
+                    onChange={(e) => updateField("ecosystem_heading", e.target.value)}
+                    placeholder="The 6 Core Business & Technology Divisions"
                     className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-200">Description</label>
-                  <textarea
-                    rows={3}
-                    value={String(c.about_body || "")}
-                    onChange={(e) => updateField("about_body", e.target.value)}
+                  <label className="block text-xs font-bold text-slate-200">Subtitle</label>
+                  <input
+                    type="text"
+                    value={String(c.ecosystem_subtitle || "")}
+                    onChange={(e) => updateField("ecosystem_subtitle", e.target.value)}
                     className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
                   />
                 </div>
@@ -393,6 +477,16 @@ export default function AdminContentPage() {
                   className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
                 />
               </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-200">Button Link</label>
+                <input
+                  type="text"
+                  value={String(c.partnership_cta_link || "")}
+                  onChange={(e) => updateField("partnership_cta_link", e.target.value)}
+                  placeholder="/contact"
+                  className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none font-mono"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -403,6 +497,17 @@ export default function AdminContentPage() {
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-electric-400">
               Corporate Governance & Vision Content
             </h2>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-200">Overview Heading</label>
+              <input
+                type="text"
+                value={String(c.overview_heading || "")}
+                onChange={(e) => updateField("overview_heading", e.target.value)}
+                placeholder="Corporate Governance & Strategic Architecture"
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+              />
+            </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-200">Corporate Overview Body</label>
@@ -435,7 +540,92 @@ export default function AdminContentPage() {
               </div>
             </div>
 
+            {/* Core Principles */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-white text-xs">Institutional Core Principles</span>
+                  <p className="text-[10px] text-slate-400">Principle cards on the About page</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const list = Array.isArray(c.philosophy_items) ? [...c.philosophy_items] : [];
+                    list.push({ title: "Principle", description: "" });
+                    updateField("philosophy_items", list);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] font-semibold text-slate-200 hover:bg-slate-700"
+                >
+                  <Plus className="h-3 w-3" />
+                  Add Principle
+                </button>
+              </div>
+              <div className="mt-3">
+                <label className="block text-xs font-bold text-slate-200">Section Heading</label>
+                <input
+                  type="text"
+                  value={String(c.philosophy_heading || "")}
+                  onChange={(e) => updateField("philosophy_heading", e.target.value)}
+                  placeholder="Institutional Core Principles"
+                  className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+                />
+              </div>
+              <div className="mt-3 space-y-2">
+                {philosophyItems.map((item, idx) => (
+                    <div key={idx} className="rounded-lg border border-slate-800 bg-slate-900 p-2 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={item.title || ""}
+                          onChange={(e) => {
+                            const next = [...philosophyItems];
+                            next[idx] = { ...next[idx], title: e.target.value };
+                            updateField("philosophy_items", next);
+                          }}
+                          placeholder="Principle title"
+                          className="flex-1 rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs font-bold text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = philosophyItems.filter((_, i: number) => i !== idx);
+                            updateField("philosophy_items", next);
+                          }}
+                          className="rounded p-1 text-slate-500 hover:text-red-400"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={item.description || ""}
+                        onChange={(e) => {
+                          const next = [...philosophyItems];
+                          next[idx] = { ...next[idx], description: e.target.value };
+                          updateField("philosophy_items", next);
+                        }}
+                        placeholder="Principle description"
+                        className="w-full rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-white"
+                      />
+                    </div>
+                  ))}
+              </div>
+            </div>
+
             {/* Strategic Roadmap */}
+            <div>
+              <label className="block text-xs font-bold text-slate-200">
+                Roadmap Section Heading
+              </label>
+              <input
+                type="text"
+                value={String(c.strategy_heading || "")}
+                onChange={(e) => updateField("strategy_heading", e.target.value)}
+                placeholder="Global Group Technology Roadmap"
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+              />
+            </div>
+
             <div>
               <label className="block text-xs font-bold text-slate-200">
                 Technology Roadmap & Strategic Vectors
@@ -448,7 +638,79 @@ export default function AdminContentPage() {
               />
             </div>
 
+            {/* R&D Focus Areas */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-white text-xs">Key R&D Focus Areas</span>
+                  <p className="text-[10px] text-slate-400">Checklist on the About roadmap section</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const list = [...innovationItems];
+                    list.push("");
+                    updateField("innovation_items", list);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] font-semibold text-slate-200 hover:bg-slate-700"
+                >
+                  <Plus className="h-3 w-3" />
+                  Add Item
+                </button>
+              </div>
+              <div className="mt-3">
+                <label className="block text-xs font-bold text-slate-200">Section Heading</label>
+                <input
+                  type="text"
+                  value={String(c.innovation_heading || "")}
+                  onChange={(e) => updateField("innovation_heading", e.target.value)}
+                  placeholder="Key R&D Focus Areas"
+                  className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+                />
+              </div>
+              <div className="mt-3 space-y-2">
+                {innovationItems.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={String(item || "")}
+                        onChange={(e) => {
+                          const next = [...innovationItems];
+                          next[idx] = e.target.value;
+                          updateField("innovation_items", next);
+                        }}
+                        placeholder="R&D focus area"
+                        className="flex-1 rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = innovationItems.filter((_, i: number) => i !== idx);
+                          updateField("innovation_items", next);
+                        }}
+                        className="rounded p-1 text-slate-500 hover:text-red-400"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
             {/* Governance Section */}
+            <div>
+              <label className="block text-xs font-bold text-slate-200">
+                Governance Section Heading
+              </label>
+              <input
+                type="text"
+                value={String(c.governance_heading || "")}
+                onChange={(e) => updateField("governance_heading", e.target.value)}
+                placeholder="Group Governance & Board Oversight"
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+              />
+            </div>
+
             <div>
               <label className="block text-xs font-bold text-slate-200">
                 Board Oversight & Triangular Governance Mandate

@@ -16,9 +16,14 @@ export default async function AdminLayout({
     return <>{children}</>;
   }
 
-  const unreadCount = await prisma.contactInquiry.count({
-    where: { status: "New" },
-  });
+  let unreadCount = 0;
+  try {
+    unreadCount = await prisma.contactInquiry.count({
+      where: { status: "New" },
+    });
+  } catch {
+    unreadCount = 0;
+  }
 
   return (
     <AdminShell admin={admin} unreadCount={unreadCount}>

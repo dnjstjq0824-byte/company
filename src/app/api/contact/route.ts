@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendInquiryNotificationEmail } from "@/lib/email";
 import { getAllSiteSettings } from "@/lib/data";
@@ -115,8 +115,14 @@ export async function POST(request: NextRequest) {
     });
 
     let savedId = "demo-" + Date.now();
-    if (prisma) {
-      const created = await prisma.contactInquiry.create({
+    const db = getPrisma();
+    if (!db) {
+      console.warn(
+        "Contact inquiry received without database persistence (DATABASE_URL unconfigured). Relying on email notification only."
+      );
+    }
+    if (db) {
+      const created = await db.contactInquiry.create({
         data: {
           full_name,
           email,

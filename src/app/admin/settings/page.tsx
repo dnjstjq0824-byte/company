@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Upload, Loader2, CheckCircle2, Globe, Bell, Shield, Layers } from "lucide-react";
+import { Save, Upload, Loader2, CheckCircle2, Globe, Layers } from "lucide-react";
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -94,7 +94,7 @@ export default function AdminSettingsPage() {
           Corporate Settings & Global Brand Governance
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          Configure Booking Network Global Group's corporate nomenclature, internationalization defaults, announcement banners, and regulatory communications.
+          Configure Booking Network Global Group&apos;s corporate nomenclature, internationalization defaults, announcement banners, and regulatory communications.
         </p>
       </div>
 
@@ -175,6 +175,18 @@ export default function AdminSettingsPage() {
             />
           </div>
 
+          <div className="mt-4">
+            <label className="block text-xs font-bold text-slate-200">
+              Institutional Brand Positioning (Korean)
+            </label>
+            <textarea
+              rows={2}
+              value={settings.brand_positioning_kr || ""}
+              onChange={(e) => updateKey("brand_positioning_kr", e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none leading-relaxed"
+            />
+          </div>
+
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-bold text-slate-200">
@@ -207,7 +219,7 @@ export default function AdminSettingsPage() {
               <div className="mt-1.5 flex items-center gap-2">
                 <input
                   type="text"
-                  value={settings.favicon || "/favicon.ico"}
+                  value={settings.favicon || "/logos/booking-network.svg"}
                   onChange={(e) => updateKey("favicon", e.target.value)}
                   className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs font-mono text-white focus:border-electric-500 focus:outline-none"
                 />
@@ -251,8 +263,8 @@ export default function AdminSettingsPage() {
                 Top Announcement Bar Status
               </label>
               <select
-                value={settings.announcement_bar_enabled || "true"}
-                onChange={(e) => updateKey("announcement_bar_enabled", e.target.value)}
+                value={settings.global_announcement_enabled || "true"}
+                onChange={(e) => updateKey("global_announcement_enabled", e.target.value)}
                 className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
               >
                 <option value="true">Enabled (Visible at top of site)</option>
@@ -268,8 +280,8 @@ export default function AdminSettingsPage() {
               </label>
               <input
                 type="text"
-                value={settings.announcement_bar_text || ""}
-                onChange={(e) => updateKey("announcement_bar_text", e.target.value)}
+                value={settings.global_announcement_text || ""}
+                onChange={(e) => updateKey("global_announcement_text", e.target.value)}
                 placeholder="e.g. Booking Network Global Group Strategic Vision 2026..."
                 className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
               />
@@ -280,8 +292,8 @@ export default function AdminSettingsPage() {
               </label>
               <input
                 type="text"
-                value={settings.announcement_bar_link || ""}
-                onChange={(e) => updateKey("announcement_bar_link", e.target.value)}
+                value={settings.global_announcement_link || ""}
+                onChange={(e) => updateKey("global_announcement_link", e.target.value)}
                 placeholder="/newsroom/... or https://..."
                 className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none font-mono"
               />
@@ -329,6 +341,45 @@ export default function AdminSettingsPage() {
                 value={settings.telephone || "+82 2-555-0199"}
                 onChange={(e) => updateKey("telephone", e.target.value)}
                 className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-200">
+                Investor Relations Email
+              </label>
+              <input
+                type="email"
+                value={settings.ir_email || "ir@bookingnetwork.com"}
+                onChange={(e) => updateKey("ir_email", e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-200">
+                Press & Media Email
+              </label>
+              <input
+                type="email"
+                value={settings.pr_email || "press@bookingnetwork.com"}
+                onChange={(e) => updateKey("pr_email", e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-200">
+                Operating Hours
+              </label>
+              <input
+                type="text"
+                value={settings.operating_hours || ""}
+                onChange={(e) => updateKey("operating_hours", e.target.value)}
+                placeholder="Monday – Friday: 09:00 – 18:00 (KST / UTC+9)"
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
               />
             </div>
           </div>
@@ -400,6 +451,78 @@ export default function AdminSettingsPage() {
                 onChange={(e) => updateKey("social_github", e.target.value)}
                 className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
               />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-200">
+                X (Twitter) URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://x.com/..."
+                value={settings.social_x || ""}
+                onChange={(e) => updateKey("social_x", e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-200">
+                YouTube Channel URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://youtube.com/@..."
+                value={settings.social_youtube || ""}
+                onChange={(e) => updateKey("social_youtube", e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 5. SEO Defaults & Privacy Consent */}
+        <div className="border-t border-slate-800 pt-6">
+          <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-electric-400">
+            5. SEO Defaults & Privacy Consent
+          </h2>
+          <div className="mt-4 grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-200">
+                Default SEO Title
+              </label>
+              <input
+                type="text"
+                value={settings.default_seo_title || ""}
+                onChange={(e) => updateKey("default_seo_title", e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-200">
+                Default SEO Description
+              </label>
+              <textarea
+                rows={2}
+                value={settings.default_seo_description || ""}
+                onChange={(e) => updateKey("default_seo_description", e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none leading-relaxed"
+              />
+            </div>
+
+            <div className="max-w-xs">
+              <label className="block text-xs font-bold text-slate-200">
+                Cookie Consent Banner
+              </label>
+              <select
+                value={settings.cookie_consent_enabled || "true"}
+                onChange={(e) => updateKey("cookie_consent_enabled", e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:border-electric-500 focus:outline-none"
+              >
+                <option value="true">Enabled (Visible until consented)</option>
+                <option value="false">Disabled (Hidden)</option>
+              </select>
             </div>
           </div>
         </div>

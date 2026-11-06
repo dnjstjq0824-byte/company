@@ -108,8 +108,18 @@ export async function POST(request: NextRequest) {
       await fs.writeFile(targetPath, buffer);
       publicUrl = `/uploads/${uniqueName}`;
     } catch (fsErr) {
-      // Serverless or read-only filesystem fallback: return base64 data URL
+      // Serverless or read-only filesystem fallback: small files become inline
+      // Data URLs, larger ones are rejected to avoid database bloat.
       console.warn("Filesystem write unavailable, using inline Data URL fallback:", fsErr);
+      if (buffer.length > 512 * 1024) {
+        return NextResponse.json(
+          {
+            error:
+              "Persistent file storage is unavailable in this runtime and the file is too large to embed. Use an image under 512 KB or configure persistent storage.",
+          },
+          { status: 507 }
+        );
+      }
       publicUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
     }
 

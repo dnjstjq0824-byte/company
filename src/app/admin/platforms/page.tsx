@@ -8,23 +8,19 @@ import {
   Trash2,
   ExternalLink,
   Upload,
-  Check,
   X,
   Eye,
   Loader2,
   Layers,
-  Server,
-  Cpu,
-  Network,
-  ShieldCheck,
-  Sparkles,
-  Leaf,
 } from "lucide-react";
 import { ParsedPlatform } from "@/lib/data";
 import { StatusBadge } from "@/components/StatusBadge";
 
 const PLATFORM_STATUSES = [
+  "Core Architecture",
   "Live",
+  "Expanding",
+  "R&D Phase",
   "Coming Soon",
   "In Development",
   "Temporarily Unavailable",
@@ -41,7 +37,7 @@ const CATEGORIES = [
   "ESG & Governance",
 ];
 
-const ICONS = ["Server", "Cpu", "Network", "ShieldCheck", "Sparkles", "Leaf", "Layers"];
+const ICONS = ["Boxes", "Cloud", "Cpu", "Globe", "Layers", "Leaf", "Network", "Server", "ShieldCheck", "Sparkles"];
 
 interface MetricItem {
   label: string;
@@ -126,6 +122,15 @@ export default function AdminPlatformsPage() {
   useEffect(() => {
     fetchPlatforms();
   }, []);
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setModalOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [modalOpen]);
 
   const openCreateModal = () => {
     setForm({
@@ -743,6 +748,51 @@ export default function AdminPlatformsPage() {
                       onChange={(e) => setForm({ ...form, business_purpose: e.target.value })}
                       className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
                       placeholder="e.g. Backbone computing and networking layer"
+                    />
+                  </div>
+                </div>
+
+                {/* Logo & SEO */}
+                <div>
+                  <label className="block font-bold text-slate-200">Division Logo</label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={form.logo}
+                      onChange={(e) => setForm({ ...form, logo: e.target.value })}
+                      placeholder="/logos/booking-network.svg"
+                      className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-300 focus:border-electric-500 focus:outline-none"
+                    />
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700">
+                      <Upload className="h-3.5 w-3.5" />
+                      {uploading ? "..." : "Upload"}
+                      <input
+                        type="file"
+                        accept=".svg,.png,.jpg,.jpeg,.webp"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block font-bold text-slate-200">SEO Title (optional)</label>
+                    <input
+                      type="text"
+                      value={form.seo_title}
+                      onChange={(e) => setForm({ ...form, seo_title: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-200">SEO Description (optional)</label>
+                    <input
+                      type="text"
+                      value={form.seo_description}
+                      onChange={(e) => setForm({ ...form, seo_description: e.target.value })}
+                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-electric-500 focus:outline-none"
                     />
                   </div>
                 </div>

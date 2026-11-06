@@ -10,8 +10,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Filter,
-  Globe,
-  Terminal,
 } from "lucide-react";
 
 interface AdminUser {

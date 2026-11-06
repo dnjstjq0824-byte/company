@@ -34,7 +34,9 @@ export async function PATCH(
         ? body.priority
         : existing.priority || "Normal";
     const department =
-      body.department !== undefined
+      body.department !== undefined &&
+      body.department !== null &&
+      String(body.department).trim()
         ? String(body.department).trim()
         : existing.department;
     const assigned_to =

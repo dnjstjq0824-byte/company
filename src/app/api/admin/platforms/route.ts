@@ -5,7 +5,10 @@ import { getAuthenticatedAdmin, logAdminActivity } from "@/lib/auth";
 import { parsePlatformRecord } from "@/lib/data";
 
 const VALID_STATUSES = [
+  "Core Architecture",
   "Live",
+  "Expanding",
+  "R&D Phase",
   "Coming Soon",
   "In Development",
   "Temporarily Unavailable",
