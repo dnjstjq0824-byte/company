@@ -5,9 +5,6 @@ import {
   DEFAULT_GLOBAL_HUBS,
   DEFAULT_SITE_SETTINGS,
   DEFAULT_CONTENT_PAGES,
-  type PlatformDivision,
-  type NewsPostItem,
-  type GlobalHubItem,
 } from "./default-data";
 
 export interface ParsedPlatform {
